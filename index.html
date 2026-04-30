@@ -301,6 +301,9 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="sb-item" onclick="nav('conciliacao',this)"><span class="ic">✓</span>Conciliação OFX</div>
     <div class="sb-sec">Gestão</div>
     <div class="sb-item" onclick="nav('usuarios',this)"><span class="ic">◎</span>Usuários</div>
+    <div class="sb-item" onclick="nav('inadimplencia',this)"><span class="ic">⚠</span>Inadimplência</div>
+    <div class="sb-item" onclick="nav('previsao',this)"><span class="ic">↗</span>Previsão Caixa</div>
+    <div class="sb-item" onclick="nav('graficos',this)"><span class="ic">◐</span>Gráficos Avançados</div>
     <div class="sb-item" onclick="nav('config',this)"><span class="ic">⚙</span>Configurações</div>
   </div>
   <div id="sb-foot">
@@ -505,6 +508,84 @@ tbody tr:hover td{background:var(--bg3)}
       </div>
       <div class="fg" style="margin-top:10px"><label>Despesas</label><div id="cats-p" style="font-size:11px;color:var(--text2);line-height:1.8"></div></div>
       <div class="fg" style="margin-top:6px"><label>Receitas</label><div id="cats-r" style="font-size:11px;color:var(--text2);line-height:1.8"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- INADIMPLÊNCIA -->
+<div class="section" id="sec-inadimplencia">
+  <div class="mgrid" id="inad-m"></div>
+  <div class="card" style="padding:10px 14px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input id="inad-q" placeholder="🔍 Buscar cliente..." oninput="renderInad()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:220px">
+      <select id="inad-emp" class="tb-sel" onchange="renderInad()"><option value="todas">Todas as escolas</option></select>
+      <select id="inad-dias" class="tb-sel" onchange="renderInad()">
+        <option value="0">Todos os vencidos</option>
+        <option value="30">Até 30 dias</option>
+        <option value="60">31 a 60 dias</option>
+        <option value="90">61 a 90 dias</option>
+        <option value="91">Acima de 90 dias</option>
+      </select>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="tb-btn" onclick="exportCSVInad()">↓ CSV</button>
+        <button class="tb-btn primary" onclick="exportPDFInad()">↓ PDF Relatório</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="padding:0"><div class="twrap"><table>
+    <thead><tr><th>Descrição</th><th>Cliente / Aluno</th><th>Vencimento</th><th>Dias em atraso</th><th>Valor</th><th>Escola</th><th>Categoria</th><th></th></tr></thead>
+    <tbody id="tb-inad"></tbody>
+  </table></div></div>
+</div>
+
+<!-- PREVISÃO DE CAIXA -->
+<div class="section" id="sec-previsao">
+  <div class="alert al-i">📈 Projeção baseada nos lançamentos pendentes cadastrados + histórico médio dos últimos meses.</div>
+  <div class="mgrid" id="prev-m"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Projeção próximos 6 meses</div><div class="card-sub">Entradas e saídas previstas</div></div></div>
+      <div id="prev-chart" style="overflow-x:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Saldo projetado acumulado</div></div>
+      <div id="prev-saldo"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Calendário de vencimentos — próximos 90 dias</div></div>
+    <div id="prev-calendario"></div>
+  </div>
+</div>
+
+<!-- GRÁFICOS AVANÇADOS -->
+<div class="section" id="sec-graficos">
+  <div class="card">
+    <div class="card-hdr"><div><div class="card-title">Comparativo entre escolas</div><div class="card-sub">Receita, despesa e resultado por unidade</div></div></div>
+    <div id="graf-comp"></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Evolução anual — Receitas</div></div>
+      <div id="graf-rec-anual" style="overflow-x:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Evolução anual — Despesas</div></div>
+      <div id="graf-desp-anual" style="overflow-x:auto"></div>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Participação por escola (receita)</div></div>
+      <div id="graf-pizza-rec"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Top 5 categorias despesa</div></div>
+      <div id="graf-top-desp"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Margem líquida por escola (%)</div></div>
+      <div id="graf-margem"></div>
     </div>
   </div>
 </div>
@@ -761,12 +842,13 @@ function renderEmpSel(){
     const el=document.getElementById(id);
     if(el)el.innerHTML='<option value="todas">Todas (consolidado)</option>'+empresas.map(e=>'<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>').join('');
   });
+  populateInadEmp();
 }
 function trocarEmp(){currentEmpId=document.getElementById('emp-sel').value;refresh();}
 function verConsolidado(){nav('consolidado',document.querySelector('.nitem'));}
 
 // ══ NAV ══════════════════════════════════════════════
-const PTITLES={dashboard:'Dashboard',cashflow:'Fluxo de Caixa',consolidado:'Visão Consolidada',pagar:'Contas a Pagar',receber:'Contas a Receber',cc:'Centro de Custo',dre:'DRE Completo','dre-simples':'DRE Simplificado',orcamento:'Orçamento vs Realizado',conciliacao:'Conciliação Bancária',usuarios:'Usuários e Permissões',config:'Configurações'};
+const PTITLES={dashboard:'Dashboard',inadimplencia:'Relatório de Inadimplência',previsao:'Previsão de Fluxo de Caixa',graficos:'Gráficos Avançados',cashflow:'Fluxo de Caixa',consolidado:'Visão Consolidada',pagar:'Contas a Pagar',receber:'Contas a Receber',cc:'Centro de Custo',dre:'DRE Completo','dre-simples':'DRE Simplificado',orcamento:'Orçamento vs Realizado',conciliacao:'Conciliação Bancária',usuarios:'Usuários e Permissões',config:'Configurações'};
 function nav(p,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
@@ -782,7 +864,7 @@ function refresh(){
   if(m)renderPage(m[1]);
 }
 function renderPage(p){
-  const map={dashboard:renderDashboard,cashflow:renderCashflow,consolidado:renderConsolidado,pagar:renderPagar,receber:renderReceber,cc:renderCC,dre:renderDRE,'dre-simples':renderDRESimples,orcamento:renderOrcamento,conciliacao:()=>{},usuarios:renderUsuarios,config:renderConfig};
+  const map={dashboard:renderDashboard,cashflow:renderCashflow,consolidado:renderConsolidado,pagar:renderPagar,receber:renderReceber,cc:renderCC,dre:renderDRE,'dre-simples':renderDRESimples,orcamento:renderOrcamento,conciliacao:()=>{},inadimplencia:renderInad,previsao:renderPrevisao,graficos:renderGraficos,usuarios:renderUsuarios,config:renderConfig};
   if(map[p])map[p]();
 }
 
@@ -1612,6 +1694,292 @@ function notify(msg,type='success'){
   el.innerHTML='<span>'+(type==='success'?'✓':type==='error'?'✕':'⚠')+'</span><span>'+msg+'</span>';
   c.appendChild(el);
   setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .25s';setTimeout(()=>el.remove(),250);},3500);
+}
+
+// ══ INADIMPLÊNCIA ════════════════════════════════════
+function diasAtraso(venc){return Math.floor((new Date(today())-new Date(venc))/(864e5));}
+
+function populateInadEmp(){
+  const s=document.getElementById('inad-emp');
+  if(s)s.innerHTML='<option value="todas">Todas as escolas</option>'+empresas.map(e=>'<option value="'+e.id+'">'+e.nome+'</option>').join('');
+}
+
+function renderInad(){
+  populateInadEmp();
+  const q=(document.getElementById('inad-q')?.value||'').toLowerCase();
+  const empF=document.getElementById('inad-emp')?.value||'todas';
+  const diasF=+document.getElementById('inad-dias')?.value||0;
+  
+  // Buscar todas as contas a receber vencidas
+  let vencidos=allReceber.filter(r=>{
+    if(!isOv(r.venc,r.status))return false;
+    if(empF!=='todas'&&r.eid!==empF)return false;
+    const da=diasAtraso(r.venc);
+    if(diasF===30&&da>30)return false;
+    if(diasF===60&&(da<=30||da>60))return false;
+    if(diasF===90&&(da<=60||da>90))return false;
+    if(diasF===91&&da<=90)return false;
+    if(q&&!r.desc.toLowerCase().includes(q)&&!(r.cli||'').toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>new Date(a.venc)-new Date(b.venc));
+
+  const total=vencidos.reduce((s,r)=>s+r.valor,0);
+  const ate30=vencidos.filter(r=>diasAtraso(r.venc)<=30);
+  const ate60=vencidos.filter(r=>diasAtraso(r.venc)>30&&diasAtraso(r.venc)<=60);
+  const acima90=vencidos.filter(r=>diasAtraso(r.venc)>90);
+
+  document.getElementById('inad-m').innerHTML=[
+    {l:'Total inadimplente',v:fmtR(total),c:'mr'},
+    {l:'Qtd. lançamentos',v:vencidos.length,c:'ma'},
+    {l:'Até 30 dias',v:fmtR(ate30.reduce((s,r)=>s+r.valor,0)),c:'ma'},
+    {l:'Acima de 90 dias',v:fmtR(acima90.reduce((s,r)=>s+r.valor,0)),c:'mr'},
+  ].map(m=>'<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>').join('');
+
+  const tb=document.getElementById('tb-inad');
+  if(!vencidos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="ei">✓</div><p>Nenhuma inadimplência no período selecionado</p></div></td></tr>';return;}
+  
+  tb.innerHTML=vencidos.map(r=>{
+    const da=diasAtraso(r.venc);
+    const gravidade=da<=30?'ba':da<=60?'ba':da<=90?'br':'br';
+    const emp=empresas.find(e=>e.id===r.eid);
+    return '<tr class="ov"><td><div style="font-size:12px;font-weight:600">'+r.desc+'</div></td>'+
+      '<td class="muted">'+(r.cli||'—')+'</td>'+
+      '<td class="mono" style="font-size:11px">'+r.venc+'</td>'+
+      '<td><span class="badge '+gravidade+'">'+da+' dias</span></td>'+
+      '<td class="mono tr fw7">'+fmtR(r.valor)+'</td>'+
+      '<td><div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:'+(emp?emp.cor:'#888')+'"></div><span style="font-size:11px">'+(emp?emp.nome.split(' ').slice(0,2).join(' '):'—')+'</span></div></td>'+
+      '<td><span class="tag">'+r.cat+'</span></td>'+
+      '<td><div style="display:flex;gap:3px">'+
+        '<button class="tb-btn sm" onclick="toggleSt('receber',''+r.id+'')">✓ Receber</button>'+
+        '<button class="tb-btn sm" onclick="negociar(''+r.id+'')">↺ Negociar</button>'+
+      '</div></td></tr>';
+  }).join('');
+}
+
+function negociar(id){
+  const r=allReceber.find(x=>x.id===id);
+  if(!r)return;
+  const novaData=prompt('Nova data de vencimento para negociação (AAAA-MM-DD):',today());
+  if(!novaData)return;
+  r.venc=novaData;r.status='pendente';
+  salvar();renderInad();notify('Vencimento renegociado para '+novaData,'success');
+}
+
+function exportCSVInad(){
+  const vencidos=allReceber.filter(r=>isOv(r.venc,r.status));
+  const rows=[['Descrição','Cliente','Vencimento','Dias Atraso','Valor','Escola','Categoria'],
+    ...vencidos.map(r=>[r.desc,r.cli||'',r.venc,diasAtraso(r.venc),r.valor,empNome(r.eid),r.cat])];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\n');
+  dlFile('\uFEFF'+csv,'text/csv','inadimplencia.csv');notify('CSV exportado','success');
+}
+
+function exportPDFInad(){
+  const {jsPDF}=window.jspdf;if(!jsPDF){notify('PDF não disponível','error');return;}
+  const vencidos=allReceber.filter(r=>isOv(r.venc,r.status)).sort((a,b)=>new Date(a.venc)-new Date(b.venc));
+  const total=vencidos.reduce((s,r)=>s+r.valor,0);
+  const doc=new jsPDF();
+  doc.setFillColor(30,45,90);doc.rect(0,0,210,42,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(255,255,255);
+  doc.text('Relatório de Inadimplência',14,18);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,240);
+  doc.text('Grupo Jean Piaget — Gerado em '+new Date().toLocaleDateString('pt-BR'),14,28);
+  doc.text('Total inadimplente: '+fmtR(total)+' | '+vencidos.length+' lançamentos',14,36);
+  doc.autoTable({
+    startY:48,
+    head:[['Descrição','Cliente','Vencimento','Dias','Valor','Escola']],
+    body:vencidos.map(r=>[r.desc,r.cli||'—',r.venc,diasAtraso(r.venc)+'d',fmtR(r.valor),empNome(r.eid)]),
+    styles:{fontSize:8,cellPadding:3},
+    headStyles:{fillColor:[220,38,38],textColor:255,fontStyle:'bold'},
+    alternateRowStyles:{fillColor:[255,245,245]},
+    didParseCell:function(d){if(d.section==='body'&&d.column.index===3){const dias=parseInt(d.cell.text[0]);d.cell.styles.textColor=dias>90?[220,38,38]:dias>60?[217,119,6]:[22,163,74];}},
+    foot:[['','','TOTAL','',fmtR(total),'']],
+    footStyles:{fillColor:[254,226,226],fontStyle:'bold',textColor:[220,38,38]},
+  });
+  doc.setFontSize(7);doc.setTextColor(150);doc.text('Jean Piaget Sistema Financeiro — '+new Date().toLocaleString('pt-BR'),14,doc.internal.pageSize.height-6);
+  doc.save('Inadimplencia_JeanPiaget.pdf');notify('PDF exportado','success');
+}
+
+// ══ PREVISÃO DE CAIXA ════════════════════════════════
+function renderPrevisao(){
+  const emp=empresas.find(e=>e.id===currentEmpId);
+  const saldoAtual=(emp&&emp.saldo_ini||0)+fR().reduce((a,b)=>a+b.valor,0)-fP().reduce((a,b)=>a+b.valor,0);
+  
+  // Calcular média mensal histórica
+  const f=getF();
+  const meses=[];let a=f.ai,m=f.mi;
+  while(a<f.af||(a===f.af&&m<=f.mf)){meses.push({a,m});m++;if(m>11){m=0;a++;}}
+  
+  const mediaRec=meses.length>0?fR().reduce((s,x)=>s+x.valor,0)/meses.length:0;
+  const mediaDesp=meses.length>0?fP().reduce((s,x)=>s+x.valor,0)/meses.length:0;
+  
+  // Projeção 6 meses
+  const hoje=new Date();
+  const projecao=[];
+  let saldoAcc=saldoAtual;
+  for(let i=1;i<=6;i++){
+    const dt=new Date(hoje.getFullYear(),hoje.getMonth()+i,1);
+    const mes=dt.getMonth(),ano=dt.getFullYear();
+    // Lançamentos reais pendentes nesse mês
+    const recPend=allReceber.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===mes&&new Date(r.venc).getFullYear()===ano&&r.status!=='recebido').reduce((s,x)=>s+x.valor,0);
+    const pagPend=allPagar.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===mes&&new Date(r.venc).getFullYear()===ano&&r.status!=='pago').reduce((s,x)=>s+x.valor,0);
+    const entradas=recPend||mediaRec;
+    const saidas=pagPend||mediaDesp;
+    saldoAcc+=entradas-saidas;
+    projecao.push({label:MESES3[mes]+'/'+String(ano).slice(2),entradas,saidas,saldo:saldoAcc,temReal:recPend>0||pagPend>0});
+  }
+
+  document.getElementById('prev-m').innerHTML=[
+    {l:'Saldo atual estimado',v:fmtR(saldoAtual),c:saldoAtual>=0?'mg':'mr'},
+    {l:'Média mensal receita',v:fmtR(mediaRec),c:'mg'},
+    {l:'Média mensal despesa',v:fmtR(mediaDesp),c:'mr'},
+    {l:'Saldo proj. 6 meses',v:fmtR(projecao[5]&&projecao[5].saldo||0),c:(projecao[5]&&projecao[5].saldo>=0)?'mb':'mr'},
+  ].map(m=>'<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>').join('');
+
+  // Gráfico de barras da projeção
+  const maxV=Math.max(...projecao.map(x=>Math.max(x.entradas,x.saidas)),1);
+  document.getElementById('prev-chart').innerHTML='<div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding-bottom:24px">'+
+    projecao.map(x=>'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:40px">'+
+      '<div style="display:flex;gap:3px;align-items:flex-end;height:120px">'+
+        '<div style="width:14px;background:rgba(22,163,74,'+(x.temReal?'0.9':'0.4')+');border-radius:3px 3px 0 0;height:'+Math.round(x.entradas/maxV*120)+'px" title="Entradas: '+fmtR(x.entradas)+(x.temReal?' (real)':' (projeção)')+'"></div>'+
+        '<div style="width:14px;background:rgba(220,38,38,'+(x.temReal?'0.9':'0.4')+');border-radius:3px 3px 0 0;height:'+Math.round(x.saidas/maxV*120)+'px" title="Saídas: '+fmtR(x.saidas)+'"></div>'+
+      '</div>'+
+      '<div style="font-size:9px;color:var(--text2)">'+x.label+'</div>'+
+      '<div style="font-size:8px;color:var(--text3)">'+(x.temReal?'real':'proj.')+'</div>'+
+    '</div>').join('')+
+  '</div><div style="display:flex;gap:14px;font-size:10px;color:var(--text3);margin-top:4px">'+
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Entradas</span>'+
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#dc2626;border-radius:2px"></span>Saídas</span>'+
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(22,163,74,0.4);border-radius:2px"></span>Projetado (média)</span>'+
+  '</div>';
+
+  // Saldo acumulado
+  let saldoLine=saldoAtual;
+  document.getElementById('prev-saldo').innerHTML=projecao.map(x=>'<div class="cfrow">'+
+    '<div class="cfdot '+(x.saldo>=0?'d-in':'d-out')+'"></div>'+
+    '<div style="flex:1"><div style="font-size:12px;font-weight:600">'+x.label+'</div>'+
+    '<div style="font-size:10px;color:var(--text3)">Entradas '+fmtR(x.entradas)+' | Saídas '+fmtR(x.saidas)+'</div></div>'+
+    '<div class="mono '+(x.saldo>=0?'tg':'tr')+' fw7" style="font-size:13px">'+fmtR(x.saldo)+'</div>'+
+  '</div>').join('');
+
+  // Calendário próximos 90 dias
+  const proximos=[...allPagar.filter(r=>r.eid===currentEmpId&&r.status!=='pago'),...allReceber.filter(r=>r.eid===currentEmpId&&r.status!=='recebido')]
+    .filter(r=>{const d=(new Date(r.venc)-new Date(today()))/(864e5);return d>=-1&&d<=90;})
+    .sort((a,b)=>a.venc.localeCompare(b.venc));
+  document.getElementById('prev-calendario').innerHTML=proximos.map(r=>'<div class="cfrow">'+
+    '<div class="cfdot '+(r.cli?'d-in':'d-out')+'"></div>'+
+    '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.desc+'</div>'+
+    '<div style="font-size:10px;color:var(--text3)">'+(r.forn||r.cli||'—')+' • Vence: '+r.venc+'</div></div>'+
+    '<div class="mono '+(r.cli?'tg':'tr')+' fw7" style="font-size:12px">'+fmtR(r.valor)+'</div>'+
+  '</div>').join('')||'<div class="empty"><p>Nenhum vencimento nos próximos 90 dias</p></div>';
+}
+
+// ══ GRÁFICOS AVANÇADOS ═══════════════════════════════
+function barChart(data,colors,height){
+  const maxV=Math.max(...data.map(x=>x.v),1);
+  return '<div style="display:flex;align-items:flex-end;gap:6px;height:'+height+'px;padding-bottom:20px">'+
+    data.map((x,i)=>'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0">'+
+      '<div style="width:100%;background:'+(colors[i%colors.length])+';border-radius:3px 3px 0 0;height:'+Math.round(x.v/maxV*(height-20))+'px;opacity:.85;min-height:2px" title="'+x.label+': '+fmtR(x.v)+'"></div>'+
+      '<div style="font-size:9px;color:var(--text2);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">'+x.label+'</div>'+
+    '</div>').join('')+
+  '</div>';
+}
+
+function renderGraficos(){
+  // Comparativo entre escolas - barras agrupadas
+  const maxV=Math.max(...empresas.map(e=>{
+    const r=fR(e.id).reduce((a,b)=>a+b.valor,0);
+    const p=fP(e.id).reduce((a,b)=>a+b.valor,0);
+    return Math.max(r,p);
+  }),1);
+  const H=160;
+  document.getElementById('graf-comp').innerHTML='<div style="display:flex;gap:16px;flex-wrap:wrap">'+
+    empresas.map(e=>{
+      const r=fR(e.id).reduce((a,b)=>a+b.valor,0);
+      const p=fP(e.id).reduce((a,b)=>a+b.valor,0);
+      const res=r-p;
+      const margem=r>0?(res/r*100):0;
+      return '<div style="flex:1;min-width:200px;background:var(--bg3);border-radius:var(--r);padding:12px">'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">'+
+          '<div style="width:10px;height:10px;border-radius:50%;background:'+e.cor+'"></div>'+
+          '<span style="font-weight:700;font-size:12px">'+e.nome.split(' ').slice(0,3).join(' ')+'</span>'+
+        '</div>'+
+        '<div style="display:flex;gap:4px;align-items:flex-end;height:'+H+'px;margin-bottom:6px">'+
+          '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
+            '<div style="width:100%;background:rgba(22,163,74,.8);border-radius:3px 3px 0 0;height:'+Math.round(r/maxV*H)+'px" title="Receita: '+fmtR(r)+'"></div>'+
+            '<div style="font-size:9px;color:var(--text3)">Rec.</div>'+
+          '</div>'+
+          '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
+            '<div style="width:100%;background:rgba(220,38,38,.8);border-radius:3px 3px 0 0;height:'+Math.round(p/maxV*H)+'px" title="Despesa: '+fmtR(p)+'"></div>'+
+            '<div style="font-size:9px;color:var(--text3)">Desp.</div>'+
+          '</div>'+
+          '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
+            '<div style="width:100%;background:'+(res>=0?'rgba(37,99,235,.8)':'rgba(220,38,38,.5)')+';border-radius:3px 3px 0 0;height:'+Math.round(Math.abs(res)/maxV*H)+'px" title="Resultado: '+fmtR(res)+'"></div>'+
+            '<div style="font-size:9px;color:var(--text3)">Res.</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--text2)">Receita: <span class="tg mono">'+fmtR(r)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">Despesa: <span class="tr mono">'+fmtR(p)+'</span></div>'+
+        '<div style="font-size:11px;font-weight:600">Resultado: <span class="mono '+(res>=0?'tg':'tr')+'">'+fmtR(res)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--text2)">Margem: <span class="mono '+(margem>=0?'tg':'tr')+'">'+margem.toFixed(1)+'%</span></div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+
+  // Evolução anual - todos os meses do ano
+  const anoAtual=+document.getElementById('f-ai').value;
+  const mesesAno=Array.from({length:12},(_,i)=>({m:i,a:anoAtual}));
+  const recAnual=mesesAno.map(x=>({label:MESES3[x.m],v:allReceber.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===x.m&&new Date(r.venc).getFullYear()===x.a).reduce((s,r)=>s+r.valor,0)}));
+  const despAnual=mesesAno.map(x=>({label:MESES3[x.m],v:allPagar.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===x.m&&new Date(r.venc).getFullYear()===x.a).reduce((s,r)=>s+r.valor,0)}));
+  document.getElementById('graf-rec-anual').innerHTML=barChart(recAnual,['rgba(22,163,74,0.8)'],120);
+  document.getElementById('graf-desp-anual').innerHTML=barChart(despAnual,['rgba(220,38,38,0.8)'],120);
+
+  // Pizza participação receita por escola
+  const totalRec=fRAll().reduce((s,r)=>s+r.valor,0)||1;
+  const cores=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899'];
+  document.getElementById('graf-pizza-rec').innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
+    empresas.map((e,i)=>{
+      const r=fR(e.id).reduce((s,x)=>s+x.valor,0);
+      const pct=Math.round(r/totalRec*100);
+      return '<div class="prow">'+
+        '<div class="plbl" style="display:flex;align-items:center;gap:5px">'+
+          '<div style="width:8px;height:8px;border-radius:50%;background:'+e.cor+';flex-shrink:0"></div>'+
+          e.nome.split(' ').slice(0,2).join(' ')+
+        '</div>'+
+        '<div class="pbg"><div class="pfill" style="width:'+pct+'%;background:'+e.cor+'"></div></div>'+
+        '<div class="pval">'+pct+'%</div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
+
+  // Top 5 categorias despesa
+  const despCats={};
+  fPAll().forEach(x=>{despCats[x.cat]=(despCats[x.cat]||0)+x.valor;});
+  const top5=Object.entries(despCats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxD=Math.max(...top5.map(x=>x[1]),1);
+  document.getElementById('graf-top-desp').innerHTML='<div style="display:flex;flex-direction:column;gap:7px">'+
+    top5.map(([k,v],i)=>'<div class="prow">'+
+      '<div class="plbl">'+k.split(' ').slice(0,2).join(' ')+'</div>'+
+      '<div class="pbg"><div class="pfill" style="width:'+Math.round(v/maxD*100)+'%;background:rgba(220,38,38,'+(0.9-i*0.15)+')"></div></div>'+
+      '<div class="pval tr">'+fmtR(v)+'</div>'+
+    '</div>').join('')+
+  '</div>';
+
+  // Margem líquida por escola
+  document.getElementById('graf-margem').innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+
+    empresas.map(e=>{
+      const r=fR(e.id).reduce((s,x)=>s+x.valor,0);
+      const p=fP(e.id).reduce((s,x)=>s+x.valor,0);
+      const margem=r>0?((r-p)/r*100):0;
+      const ok=margem>=0;
+      return '<div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px">'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
+          '<span style="font-size:11px;font-weight:600">'+e.nome.split(' ').slice(0,2).join(' ')+'</span>'+
+          '<span class="mono '+(ok?'tg':'tr')+' fw7" style="font-size:13px">'+margem.toFixed(1)+'%</span>'+
+        '</div>'+
+        '<div class="pbg" style="height:8px"><div class="pfill" style="width:'+Math.min(Math.abs(margem),100)+'%;background:'+(ok?e.cor:'var(--red)')+'"></div></div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
 }
 
 // ══ INIT ═════════════════════════════════════════════
