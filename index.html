@@ -218,6 +218,20 @@ tbody tr:hover td{background:var(--bg3)}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .divider{height:1px;background:var(--border);margin:14px 0}
 @media(max-width:700px){#sidebar{display:none}.g2,.g3{grid-template-columns:1fr}.auth-left{display:none}}
+
+/* CLIP ESCOLA */
+.clip-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:700;background:#e0f2fe;color:#0369a1}
+.sb-sec-clip{padding:8px 8px 3px;font-size:9px;font-weight:700;color:#0369a1;letter-spacing:.1em;text-transform:uppercase;background:#f0f9ff;border-radius:6px;margin:4px 5px 2px}
+/* PREVISÃO */
+.prev-bar-wrap{display:flex;align-items:flex-end;gap:5px;height:140px;padding-bottom:22px}
+.prev-bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:36px}
+.prev-bar-inner{display:flex;gap:2px;align-items:flex-end;height:110px}
+.prev-bar{width:13px;border-radius:3px 3px 0 0;min-height:2px}
+.prev-bar-lbl{font-size:9px;color:var(--text2);white-space:nowrap}
+.prev-bar-sub{font-size:8px;color:var(--text3)}
+/* GRAF */  
+.graf-school-card{flex:1;min-width:180px;background:var(--bg3);border-radius:var(--r);padding:12px}
+
 </style>
 </head>
 <body>
@@ -299,15 +313,15 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="sb-item" onclick="nav('orcamento',this)"><span class="ic">⊡</span>Orçamento</div>
     <div class="sb-sec">Bancário</div>
     <div class="sb-item" onclick="nav('conciliacao',this)"><span class="ic">✓</span>Conciliação OFX</div>
-    <div class="sb-sec">CLIP Escola</div>
+    <div class="sb-sec">Análise Avançada</div>
+    <div class="sb-item" onclick="nav('inadimplencia',this)"><span class="ic">⚠</span>Inadimplência</div>
+    <div class="sb-item" onclick="nav('previsao',this)"><span class="ic">↗</span>Previsão de Caixa</div>
+    <div class="sb-item" onclick="nav('graficos',this)"><span class="ic">◐</span>Gráficos Avançados</div>
+    <div class="sb-sec-clip">CLIP Escola</div>
     <div class="sb-item" onclick="nav('clip-import',this)"><span class="ic">⇪</span>Importar do CLIP</div>
-    <div class="sb-item" onclick="nav('clip-inad',this)"><span class="ic">⚠</span>Inadim. (CLIP)</div>
-    <div class="sb-item" onclick="nav('clip-mens',this)"><span class="ic">↑</span>Mensalidades (CLIP)</div>
+    <div class="sb-item" onclick="nav('clip-alunos',this)"><span class="ic">◎</span>Alunos (CLIP)</div>
     <div class="sb-sec">Gestão</div>
     <div class="sb-item" onclick="nav('usuarios',this)"><span class="ic">◎</span>Usuários</div>
-    <div class="sb-item" onclick="nav('inadimplencia',this)"><span class="ic">⚠</span>Inadimplência</div>
-    <div class="sb-item" onclick="nav('previsao',this)"><span class="ic">↗</span>Previsão Caixa</div>
-    <div class="sb-item" onclick="nav('graficos',this)"><span class="ic">◐</span>Gráficos Avançados</div>
     <div class="sb-item" onclick="nav('config',this)"><span class="ic">⚙</span>Configurações</div>
   </div>
   <div id="sb-foot">
@@ -516,176 +530,112 @@ tbody tr:hover td{background:var(--bg3)}
   </div>
 </div>
 
-<!-- CLIP IMPORT -->
-<div class="section" id="sec-clip-import">
-  <div class="alert al-i" style="margin-bottom:14px">
-    <div>
-      <strong>Como exportar do CLIP Escola:</strong><br>
-      <strong>Mensalidades:</strong> CLIP Escola → Financeiro → Cobranças → Exportar → CSV<br>
-      <strong>Inadimplentes:</strong> CLIP Escola → Financeiro → Inadimplência → Exportar → CSV<br>
-      O sistema aceita qualquer exportação CSV do CLIP e identifica os campos automaticamente.
-    </div>
-  </div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-hdr"><div><div class="card-title">Importar mensalidades do CLIP</div><div class="card-sub">Serão criadas como contas a receber</div></div></div>
-      <div class="fg" style="margin-bottom:10px"><label>Escola de destino</label><select id="clip-emp-m"></select></div>
-      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV exportado do CLIP Escola</label>
-        <input type="file" id="clip-file-m" accept=".csv,.txt,.xls,.xlsx" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
-      </div>
-      <div class="fg" style="margin-bottom:12px"><label>Ou cole o conteúdo CSV aqui</label>
-        <textarea id="clip-txt-m" placeholder="Aluno;Responsável;Vencimento;Valor;Status&#10;João Silva;Maria Silva;2025-06-10;850,00;Em aberto&#10;Ana Costa;José Costa;2025-06-10;850,00;Pago" style="min-height:110px;resize:vertical"></textarea>
-      </div>
-      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importarClipMens()">⇪ Importar mensalidades</button>
-      <div id="clip-mens-result" style="margin-top:10px"></div>
-    </div>
-    <div class="card">
-      <div class="card-hdr"><div><div class="card-title">Importar inadimplentes do CLIP</div><div class="card-sub">Serão sincronizados com a lista de inadimplência</div></div></div>
-      <div class="fg" style="margin-bottom:10px"><label>Escola de destino</label><select id="clip-emp-i"></select></div>
-      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV exportado do CLIP Escola</label>
-        <input type="file" id="clip-file-i" accept=".csv,.txt,.xls,.xlsx" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
-      </div>
-      <div class="fg" style="margin-bottom:12px"><label>Ou cole o conteúdo CSV aqui</label>
-        <textarea id="clip-txt-i" placeholder="Aluno;Responsável;Vencimento;Valor;Dias em atraso&#10;Pedro Souza;Ana Souza;2025-05-10;850,00;31&#10;Carla Lima;Roberto Lima;2025-04-10;850,00;61" style="min-height:110px;resize:vertical"></textarea>
-      </div>
-      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importarClipInad()">⇪ Importar inadimplentes</button>
-      <div id="clip-inad-import-result" style="margin-top:10px"></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-hdr"><div class="card-title">Formato aceito — CLIP Escola CSV</div></div>
-    <div style="font-size:12px;color:var(--text2);line-height:2">
-      O sistema detecta automaticamente os seguintes formatos de exportação do CLIP:<br>
-      <span class="tag">Aluno</span> <span class="tag">Responsável</span> <span class="tag">Vencimento</span> <span class="tag">Valor</span> <span class="tag">Status</span> <span class="tag">Dias em atraso</span> <span class="tag">Turma</span> <span class="tag">Série</span><br>
-      Separadores aceitos: <strong>; (ponto e vírgula)</strong> ou <strong>, (vírgula)</strong><br>
-      Datas aceitas: <strong>DD/MM/AAAA</strong> ou <strong>AAAA-MM-DD</strong><br>
-      Valores aceitos: <strong>850,00</strong> ou <strong>850.00</strong>
-    </div>
-  </div>
-</div>
-
-<!-- CLIP INADIMPLENTES -->
-<div class="section" id="sec-clip-inad">
-  <div class="card" style="padding:10px 14px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <input id="ci-q" placeholder="🔍 Buscar aluno ou responsável..." oninput="renderClipInad()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:220px">
-      <select id="ci-emp" class="tb-sel" onchange="renderClipInad()"><option value="todas">Todas as escolas</option></select>
-      <select id="ci-dias" class="tb-sel" onchange="renderClipInad()">
-        <option value="0">Todos</option><option value="30">Até 30 dias</option>
-        <option value="60">31–60 dias</option><option value="90">61–90 dias</option><option value="91">Acima de 90 dias</option>
-      </select>
-      <div style="margin-left:auto;display:flex;gap:6px">
-        <button class="tb-btn" onclick="exportClipInadCSV()">↓ CSV</button>
-        <button class="tb-btn primary" onclick="exportClipInadPDF()">↓ PDF Cobrança</button>
-      </div>
-    </div>
-  </div>
-  <div class="mgrid" id="ci-metrics"></div>
-  <div class="card" style="padding:0"><div class="twrap"><table>
-    <thead><tr><th>Aluno</th><th>Responsável</th><th>Turma/Série</th><th>Vencimento</th><th>Dias atraso</th><th>Valor</th><th>Total devido</th><th>Escola</th><th>Ações</th></tr></thead>
-    <tbody id="tb-clip-inad"></tbody>
-  </table></div></div>
-</div>
-
-<!-- CLIP MENSALIDADES -->
-<div class="section" id="sec-clip-mens">
-  <div class="card" style="padding:10px 14px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <input id="cm-q" placeholder="🔍 Buscar aluno..." oninput="renderClipMens()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:220px">
-      <select id="cm-emp" class="tb-sel" onchange="renderClipMens()"><option value="todas">Todas as escolas</option></select>
-      <select id="cm-status" class="tb-sel" onchange="renderClipMens()">
-        <option value="">Todos</option><option value="pendente">Pendente</option>
-        <option value="recebido">Recebido/Pago</option><option value="vencido">Vencido</option>
-      </select>
-      <div style="margin-left:auto;display:flex;gap:6px">
-        <button class="tb-btn" onclick="exportClipMensCSV()">↓ CSV</button>
-        <button class="tb-btn primary" onclick="sincronizarComFinanceiro()">↺ Sincronizar com financeiro</button>
-      </div>
-    </div>
-  </div>
-  <div class="mgrid" id="cm-metrics"></div>
-  <div class="card" style="padding:0"><div class="twrap"><table>
-    <thead><tr><th>Aluno</th><th>Responsável</th><th>Turma</th><th>Vencimento</th><th>Valor</th><th>Escola</th><th>Status CLIP</th><th>No financeiro</th><th></th></tr></thead>
-    <tbody id="tb-clip-mens"></tbody>
-  </table></div></div>
-</div>
 
 <!-- INADIMPLÊNCIA -->
 <div class="section" id="sec-inadimplencia">
-  <div class="mgrid" id="inad-m"></div>
   <div class="card" style="padding:10px 14px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <input id="inad-q" placeholder="🔍 Buscar cliente..." oninput="renderInad()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:220px">
+      <input id="inad-q" placeholder="Buscar cliente..." oninput="renderInad()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:200px">
       <select id="inad-emp" class="tb-sel" onchange="renderInad()"><option value="todas">Todas as escolas</option></select>
-      <select id="inad-dias" class="tb-sel" onchange="renderInad()">
+      <select id="inad-faixa" class="tb-sel" onchange="renderInad()">
         <option value="0">Todos os vencidos</option>
-        <option value="30">Até 30 dias</option>
+        <option value="30">Ate 30 dias</option>
         <option value="60">31 a 60 dias</option>
         <option value="90">61 a 90 dias</option>
         <option value="91">Acima de 90 dias</option>
       </select>
       <div style="margin-left:auto;display:flex;gap:6px">
-        <button class="tb-btn" onclick="exportCSVInad()">↓ CSV</button>
-        <button class="tb-btn primary" onclick="exportPDFInad()">↓ PDF Relatório</button>
+        <button class="tb-btn" onclick="exportCSVInad()">CSV</button>
+        <button class="tb-btn primary" onclick="exportPDFInad()">PDF Cobranca</button>
       </div>
     </div>
   </div>
+  <div class="mgrid" id="inad-metrics"></div>
   <div class="card" style="padding:0"><div class="twrap"><table>
-    <thead><tr><th>Descrição</th><th>Cliente / Aluno</th><th>Vencimento</th><th>Dias em atraso</th><th>Valor</th><th>Escola</th><th>Categoria</th><th></th></tr></thead>
+    <thead><tr><th>Descricao</th><th>Cliente</th><th>Vencimento</th><th>Dias atraso</th><th>Valor</th><th>Escola</th><th>Categoria</th><th></th></tr></thead>
     <tbody id="tb-inad"></tbody>
   </table></div></div>
 </div>
 
-<!-- PREVISÃO DE CAIXA -->
+<!-- PREVISAO CAIXA -->
 <div class="section" id="sec-previsao">
-  <div class="alert al-i">📈 Projeção baseada nos lançamentos pendentes cadastrados + histórico médio dos últimos meses.</div>
-  <div class="mgrid" id="prev-m"></div>
+  <div class="alert al-i">Projecao baseada nos lancamentos pendentes + media historica do periodo selecionado.</div>
+  <div class="mgrid" id="prev-metrics"></div>
   <div class="g2">
-    <div class="card">
-      <div class="card-hdr"><div><div class="card-title">Projeção próximos 6 meses</div><div class="card-sub">Entradas e saídas previstas</div></div></div>
-      <div id="prev-chart" style="overflow-x:auto"></div>
-    </div>
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">Saldo projetado acumulado</div></div>
-      <div id="prev-saldo"></div>
-    </div>
+    <div class="card"><div class="card-hdr"><div><div class="card-title">Projecao proximos 6 meses</div><div class="card-sub">Verde = real cadastrado | Claro = media historica</div></div></div><div id="prev-chart"></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title">Saldo acumulado projetado</div></div><div id="prev-saldo"></div></div>
   </div>
-  <div class="card">
-    <div class="card-hdr"><div class="card-title">Calendário de vencimentos — próximos 90 dias</div></div>
-    <div id="prev-calendario"></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Vencimentos proximos 90 dias</div></div><div id="prev-cal"></div></div>
+</div>
+
+<!-- GRAFICOS AVANCADOS -->
+<div class="section" id="sec-graficos">
+  <div class="card"><div class="card-hdr"><div><div class="card-title">Comparativo entre escolas</div><div class="card-sub">Periodo selecionado</div></div></div><div id="graf-comp" style="display:flex;gap:12px;flex-wrap:wrap"></div></div>
+  <div class="g2">
+    <div class="card"><div class="card-hdr"><div class="card-title">Evolucao anual de receitas</div></div><div id="graf-rec"></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title">Evolucao anual de despesas</div></div><div id="graf-desp"></div></div>
+  </div>
+  <div class="g3">
+    <div class="card"><div class="card-hdr"><div class="card-title">Participacao por escola</div></div><div id="graf-pizza"></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title">Top 5 categorias despesa</div></div><div id="graf-top"></div></div>
+    <div class="card"><div class="card-hdr"><div class="card-title">Margem liquida por escola</div></div><div id="graf-margem"></div></div>
   </div>
 </div>
 
-<!-- GRÁFICOS AVANÇADOS -->
-<div class="section" id="sec-graficos">
-  <div class="card">
-    <div class="card-hdr"><div><div class="card-title">Comparativo entre escolas</div><div class="card-sub">Receita, despesa e resultado por unidade</div></div></div>
-    <div id="graf-comp"></div>
+<!-- CLIP IMPORT -->
+<div class="section" id="sec-clip-import">
+  <div class="alert al-i">
+    Como exportar do CLIP Escola:<br>
+    Mensalidades: ClipPag > Cobrancas > Exportar CSV<br>
+    Inadimplentes: ClipPag > Inadimplencia > Exportar CSV
   </div>
   <div class="g2">
     <div class="card">
-      <div class="card-hdr"><div class="card-title">Evolução anual — Receitas</div></div>
-      <div id="graf-rec-anual" style="overflow-x:auto"></div>
+      <div class="card-hdr"><div><div class="card-title">Importar mensalidades</div><div class="card-sub">Geradas como contas a receber</div></div></div>
+      <div class="fg" style="margin-bottom:10px"><label>Escola de destino</label><select id="clip-emp-m"></select></div>
+      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV do CLIP</label>
+        <input type="file" id="clip-file-m" accept=".csv,.txt" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label>Ou cole o conteudo CSV</label>
+        <textarea id="clip-txt-m" placeholder="Aluno;Responsavel;Vencimento;Valor;Status" style="min-height:100px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:100%"></textarea>
+      </div>
+      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importarClipMens()">Importar mensalidades</button>
+      <div id="clip-msg-m" style="margin-top:8px"></div>
     </div>
     <div class="card">
-      <div class="card-hdr"><div class="card-title">Evolução anual — Despesas</div></div>
-      <div id="graf-desp-anual" style="overflow-x:auto"></div>
+      <div class="card-hdr"><div><div class="card-title">Importar inadimplentes</div><div class="card-sub">Sincroniza com relatorio de inadimplencia</div></div></div>
+      <div class="fg" style="margin-bottom:10px"><label>Escola de destino</label><select id="clip-emp-i"></select></div>
+      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV do CLIP</label>
+        <input type="file" id="clip-file-i" accept=".csv,.txt" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label>Ou cole o conteudo CSV</label>
+        <textarea id="clip-txt-i" placeholder="Aluno;Responsavel;Vencimento;Valor;Dias em atraso" style="min-height:100px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:100%"></textarea>
+      </div>
+      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importarClipInad()">Importar inadimplentes</button>
+      <div id="clip-msg-i" style="margin-top:8px"></div>
     </div>
   </div>
-  <div class="g3">
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">Participação por escola (receita)</div></div>
-      <div id="graf-pizza-rec"></div>
-    </div>
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">Top 5 categorias despesa</div></div>
-      <div id="graf-top-desp"></div>
-    </div>
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">Margem líquida por escola (%)</div></div>
-      <div id="graf-margem"></div>
+</div>
+
+<!-- CLIP ALUNOS -->
+<div class="section" id="sec-clip-alunos">
+  <div class="card" style="padding:10px 14px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input id="ca-q" placeholder="Buscar aluno ou responsavel..." oninput="renderClipAlunos()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:220px">
+      <select id="ca-emp" class="tb-sel" onchange="renderClipAlunos()"><option value="todas">Todas</option></select>
+      <select id="ca-tipo" class="tb-sel" onchange="renderClipAlunos()"><option value="todas">Mensalidades + Inad.</option><option value="mens">So mensalidades</option><option value="inad">So inadimplentes</option></select>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="tb-btn" onclick="exportClipCSV()">CSV</button>
+        <button class="tb-btn primary" onclick="exportClipPDF()">PDF Cobranca</button>
+        <button class="tb-btn" onclick="sincronizarClip()">Sincronizar com financeiro</button>
+      </div>
     </div>
   </div>
+  <div class="mgrid" id="ca-metrics"></div>
+  <div class="card" style="padding:0"><div class="twrap"><table>
+    <thead><tr><th>Aluno</th><th>Responsavel</th><th>Turma</th><th>Vencimento</th><th>Valor</th><th>Dias atraso</th><th>Escola</th><th>Tipo</th><th>No financeiro</th><th></th></tr></thead>
+    <tbody id="tb-clip-alunos"></tbody>
+  </table></div></div>
 </div>
 
 </div></div></div>
@@ -795,7 +745,7 @@ let CAT_P=['Pessoal e Encargos','Aluguel e Ocupação','Material Pedagógico','A
 let CAT_R=['Mensalidades','Matrículas','Material Didático','Serviços Educacionais','Projetos Especiais','Subvenções','Outros'];
 let cfg={alerta:7,ir:0,regime:'simples'};
 let currentUser=null,currentEmpId=null;
-let empresas=[],allPagar=[],allReceber=[],orcamentos=[],concItems=[];
+let empresas=[],allPagar=[],allReceber=[],orcamentos=[],concItems=[],clipData=[];
 let nextId=1000;
 
 // ══ EMPRESAS INICIAIS ════════════════════════════════
@@ -906,7 +856,7 @@ function seedDemo(){
 
 function salvar(){
   if(!currentUser)return;
-  try{localStorage.setItem('jp_d_'+currentUser.id,JSON.stringify({empresas,allPagar,allReceber,orcamentos,cfg,clipInadimplentes,clipMensalidades}));}catch(e){}
+  try{localStorage.setItem('jp_d_'+currentUser.id,JSON.stringify({empresas,allPagar,allReceber,orcamentos,cfg,clipData}));}catch(e){}
 }
 
 function carregarDados(){
@@ -915,13 +865,10 @@ function carregarDados(){
     if(d.empresas&&d.empresas.length){
       empresas=d.empresas;currentEmpId=empresas[0].id;
       allPagar=d.allPagar||[];allReceber=d.allReceber||[];
-      orcamentos=d.orcamentos||[];cfg={...cfg,...(d.cfg||{})};
-      clipInadimplentes=d.clipInadimplentes||[];
-      clipMensalidades=d.clipMensalidades||[];
+      orcamentos=d.orcamentos||[];cfg={...cfg,...(d.cfg||{})};clipData=d.clipData||[];
     } else {
       empresas=EMPS_INICIAIS.map(e=>({...e}));currentEmpId='emp1';
-      allPagar=[];allReceber=[];orcamentos=[];
-      clipInadimplentes=[];clipMensalidades=[];
+      allPagar=[];allReceber=[];orcamentos=[];clipData=[];
     }
   }catch(e){empresas=EMPS_INICIAIS.map(e=>({...e}));currentEmpId='emp1';}
 }
@@ -943,13 +890,12 @@ function renderEmpSel(){
     const el=document.getElementById(id);
     if(el)el.innerHTML='<option value="todas">Todas (consolidado)</option>'+empresas.map(e=>'<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>').join('');
   });
-  populateInadEmp();
 }
 function trocarEmp(){currentEmpId=document.getElementById('emp-sel').value;refresh();}
 function verConsolidado(){nav('consolidado',document.querySelector('.nitem'));}
 
 // ══ NAV ══════════════════════════════════════════════
-const PTITLES={dashboard:'Dashboard',inadimplencia:'Relatório de Inadimplência','clip-import':'CLIP Escola — Importar Dados','clip-inad':'CLIP Escola — Inadimplentes','clip-mens':'CLIP Escola — Mensalidades',previsao:'Previsão de Fluxo de Caixa',graficos:'Gráficos Avançados',cashflow:'Fluxo de Caixa',consolidado:'Visão Consolidada',pagar:'Contas a Pagar',receber:'Contas a Receber',cc:'Centro de Custo',dre:'DRE Completo','dre-simples':'DRE Simplificado',orcamento:'Orçamento vs Realizado',conciliacao:'Conciliação Bancária',usuarios:'Usuários e Permissões',config:'Configurações'};
+const PTITLES={dashboard:'Dashboard',inadimplencia:'Inadimplencia',previsao:'Previsao de Caixa',graficos:'Graficos Avancados','clip-import':'CLIP Escola - Importar','clip-alunos':'CLIP Escola - Alunos',cashflow:'Fluxo de Caixa',consolidado:'Visão Consolidada',pagar:'Contas a Pagar',receber:'Contas a Receber',cc:'Centro de Custo',dre:'DRE Completo','dre-simples':'DRE Simplificado',orcamento:'Orçamento vs Realizado',conciliacao:'Conciliação Bancária',usuarios:'Usuários e Permissões',config:'Configurações'};
 function nav(p,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
@@ -965,7 +911,7 @@ function refresh(){
   if(m)renderPage(m[1]);
 }
 function renderPage(p){
-  const map={dashboard:renderDashboard,cashflow:renderCashflow,consolidado:renderConsolidado,pagar:renderPagar,receber:renderReceber,cc:renderCC,dre:renderDRE,'dre-simples':renderDRESimples,orcamento:renderOrcamento,conciliacao:()=>{},inadimplencia:renderInad,'clip-import':renderClipImport,'clip-inad':renderClipInad,'clip-mens':renderClipMens,previsao:renderPrevisao,graficos:renderGraficos,usuarios:renderUsuarios,config:renderConfig};
+  const map={dashboard:renderDashboard,cashflow:renderCashflow,consolidado:renderConsolidado,pagar:renderPagar,receber:renderReceber,cc:renderCC,dre:renderDRE,'dre-simples':renderDRESimples,orcamento:renderOrcamento,conciliacao:()=>{},inadimplencia:renderInad,previsao:renderPrevisao,graficos:renderGraficos,'clip-import':renderClipImport,'clip-alunos':renderClipAlunos,usuarios:renderUsuarios,config:renderConfig};
   if(map[p])map[p]();
 }
 
@@ -1088,6 +1034,12 @@ function populateSelects(){
   ['ml-cc'].forEach(id=>{const s=document.getElementById(id);if(s)s.innerHTML=ccOpts;});
   ['sp-cc'].forEach(id=>{const s=document.getElementById(id);if(s)s.innerHTML='<option value="">C.Custo</option>'+ccOpts;});
   populateCatSel();
+  ['clip-emp-m','clip-emp-i','inad-emp','ca-emp'].forEach(function(id){
+    var s=document.getElementById(id);if(!s)return;
+    var hasAll=id!=='clip-emp-m'&&id!=='clip-emp-i';
+    s.innerHTML=(hasAll?'<option value="todas">Todas as escolas</option>':'')+
+      empresas.map(function(e){return '<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>';}).join('');
+  });
   const orcCats=[...CAT_P,...CAT_R];
   const oc=document.getElementById('orc-cat');if(oc)oc.innerHTML=orcCats.map(c=>'<option>'+c+'</option>').join('');
   renderConfig();
@@ -1797,573 +1749,591 @@ function notify(msg,type='success'){
   setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .25s';setTimeout(()=>el.remove(),250);},3500);
 }
 
-// ══ CLIP ESCOLA ══════════════════════════════════════
-let clipInadimplentes = [];
-let clipMensalidades  = [];
+// ── DADOS CLIP ────────────────────────────────────────────────
+// clipData declared above
 
-function populateClipEmps(){
-  ['clip-emp-m','clip-emp-i','ci-emp','cm-emp'].forEach(id=>{
-    const s=document.getElementById(id);if(!s)return;
-    const all=id==='ci-emp'||id==='cm-emp';
-    s.innerHTML=(all?'<option value="todas">Todas as escolas</option>':'')+
-      empresas.map(e=>'<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>').join('');
+// ── UTILS SHARED ─────────────────────────────────────────────
+function diasAtraso(venc){
+  return Math.max(0, Math.floor((new Date(today()) - new Date(venc)) / 86400000));
+}
+
+function parseCSVclip(txt) {
+  var lines = txt.split('\n').filter(function(l){return l.trim();});
+  if (!lines.length) return [];
+  var sep = lines[0].indexOf(';') >= 0 ? ';' : ',';
+  var headers = lines[0].split(sep).map(function(h){
+    return h.trim().toLowerCase()
+      .replace(/[^a-z0-9]/g, '_').replace(/_+/g,'_').replace(/^_|_$/g,'');
   });
-}
-
-function parseCSVClip(txt){
-  const lines=txt.split('
-').filter(l=>l.trim());
-  if(!lines.length)return[];
-  const sep=lines[0].includes(';')?';':',';
-  const headers=lines[0].split(sep).map(h=>h.trim().toLowerCase()
-    .replace(/[áàã]/g,'a').replace(/[éê]/g,'e').replace(/[í]/g,'i')
-    .replace(/[óô]/g,'o').replace(/[ú]/g,'u').replace(/ç/g,'c')
-    .replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''));
-  return lines.slice(1).map(l=>{
-    const vals=l.split(sep).map(v=>v.trim().replace(/^["']|["']$/g,''));
-    const obj={};headers.forEach((h,i)=>{obj[h]=vals[i]||'';});
+  return lines.slice(1).map(function(l){
+    var vals = l.split(sep).map(function(v){return v.trim().replace(/^["']|["']$/g,'');});
+    var obj = {};
+    headers.forEach(function(h,i){ obj[h] = vals[i] || ''; });
     return obj;
-  }).filter(o=>Object.values(o).some(v=>v));
+  }).filter(function(o){ return Object.values(o).some(function(v){return v;}); });
 }
 
-function detectField(obj,candidates){
-  for(const c of candidates){
-    const k=Object.keys(obj).find(k=>k.includes(c));
-    if(k&&obj[k])return obj[k];
-  }return '';
+function detectCol(obj, candidates) {
+  for (var i=0; i<candidates.length; i++) {
+    var c = candidates[i];
+    var key = Object.keys(obj).find(function(k){ return k.indexOf(c) >= 0; });
+    if (key && obj[key]) return obj[key];
+  }
+  return '';
 }
 
-function parseValor(v){
-  if(!v)return 0;
-  return parseFloat(v.replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.'))||0;
+function parseValorClip(v) {
+  if (!v) return 0;
+  return parseFloat(v.replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.')) || 0;
 }
 
-function parseData(v){
-  if(!v)return today();
-  if(v.includes('/')){{const p=v.split('/');return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}}
+function parseDataClip(v) {
+  if (!v) return today();
+  v = v.trim();
+  if (v.indexOf('/') >= 0) {
+    var p = v.split('/');
+    if (p.length === 3) return p[2] + '-' + p[1].padStart(2,'0') + '-' + p[0].padStart(2,'0');
+  }
   return v.slice(0,10);
 }
 
-function readFileOrText(fileId,txtId,cb){
-  const file=document.getElementById(fileId)?.files[0];
-  const txt=document.getElementById(txtId)?.value||'';
-  if(file){const fr=new FileReader();fr.onload=e=>cb(e.target.result);fr.readAsText(file,'UTF-8');}
-  else if(txt)cb(txt);
-  else{notify('Selecione um arquivo ou cole o conteúdo','error');}
-}
-
-function importarClipMens(){
-  readFileOrText('clip-file-m','clip-txt-m',content=>{
-    const rows=parseCSVClip(content);
-    if(!rows.length){notify('Nenhum dado encontrado no arquivo','error');return;}
-    const empId=document.getElementById('clip-emp-m')?.value||currentEmpId;
-    let adicionados=0,atualizados=0;
-    rows.forEach(r=>{
-      const aluno=detectField(r,['aluno','nome','estudante','student']);
-      const resp=detectField(r,['responsavel','responsible','responsável','pai','mae']);
-      const venc=parseData(detectField(r,['vencimento','venc','data','due','prazo']));
-      const valor=parseValor(detectField(r,['valor','value','mensalidade','amount','preco']));
-      const statusRaw=(detectField(r,['status','situacao','situação'])||'').toLowerCase();
-      const status=statusRaw.includes('pago')||statusRaw.includes('recebido')||statusRaw.includes('quitado')?'recebido':'pendente';
-      const turma=detectField(r,['turma','classe','serie','série','class']);
-      if(!aluno&&!valor)return;
-      // Verifica se já existe
-      const existe=clipMensalidades.find(m=>m.aluno===aluno&&m.venc===venc&&m.eid===empId);
-      if(existe){existe.status=status;existe.valor=valor||existe.valor;atualizados++;}
-      else{
-        clipMensalidades.push({id:'cm'+nextId++,eid:empId,aluno:aluno||'Aluno',resp:resp||'Responsável',turma:turma||'—',venc,valor,status,origem:'clip'});
-        adicionados++;
-      }
-    });
-    salvar();
-    document.getElementById('clip-mens-result').innerHTML='<div class="alert al-s">✓ '+adicionados+' mensalidades importadas, '+atualizados+' atualizadas.</div>';
-    notify(adicionados+' mensalidades importadas do CLIP','success');
-  });
-}
-
-function importarClipInad(){
-  readFileOrText('clip-file-i','clip-txt-i',content=>{
-    const rows=parseCSVClip(content);
-    if(!rows.length){notify('Nenhum dado encontrado','error');return;}
-    const empId=document.getElementById('clip-emp-i')?.value||currentEmpId;
-    let adicionados=0,atualizados=0;
-    rows.forEach(r=>{
-      const aluno=detectField(r,['aluno','nome','estudante']);
-      const resp=detectField(r,['responsavel','responsible','responsável','pai','mae']);
-      const venc=parseData(detectField(r,['vencimento','venc','data','due']));
-      const valor=parseValor(detectField(r,['valor','value','mensalidade','amount']));
-      const dias=parseInt(detectField(r,['dias','atraso','days'])||'0')||diasAtraso(venc);
-      const turma=detectField(r,['turma','classe','serie','série']);
-      if(!aluno&&!valor)return;
-      const existe=clipInadimplentes.find(m=>m.aluno===aluno&&m.venc===venc&&m.eid===empId);
-      if(existe){existe.valor=valor||existe.valor;existe.dias=dias;atualizados++;}
-      else{
-        clipInadimplentes.push({id:'ci'+nextId++,eid:empId,aluno:aluno||'Aluno',resp:resp||'Responsável',turma:turma||'—',venc,valor,dias,origem:'clip'});
-        adicionados++;
-      }
-    });
-    salvar();
-    document.getElementById('clip-inad-import-result').innerHTML='<div class="alert al-s">✓ '+adicionados+' inadimplentes importados, '+atualizados+' atualizados.</div>';
-    notify(adicionados+' inadimplentes importados do CLIP','success');
-  });
-}
-
-function renderClipImport(){populateClipEmps();}
-
-function renderClipInad(){
-  populateClipEmps();
-  const q=(document.getElementById('ci-q')?.value||'').toLowerCase();
-  const empF=document.getElementById('ci-emp')?.value||'todas';
-  const diasF=+document.getElementById('ci-dias')?.value||0;
-  let d=clipInadimplentes.filter(r=>{
-    if(empF!=='todas'&&r.eid!==empF)return false;
-    if(diasF===30&&r.dias>30)return false;
-    if(diasF===60&&(r.dias<=30||r.dias>60))return false;
-    if(diasF===90&&(r.dias<=60||r.dias>90))return false;
-    if(diasF===91&&r.dias<=90)return false;
-    if(q&&!r.aluno.toLowerCase().includes(q)&&!r.resp.toLowerCase().includes(q))return false;
-    return true;
-  }).sort((a,b)=>b.dias-a.dias);
-
-  const total=d.reduce((s,r)=>s+r.valor,0);
-  const critico=d.filter(r=>r.dias>90);
-  document.getElementById('ci-metrics').innerHTML=[
-    {l:'Total inadimplente (CLIP)',v:fmtR(total),c:'mr'},
-    {l:'Alunos inadimplentes',v:d.length,c:'ma'},
-    {l:'Críticos (>90 dias)',v:critico.length,c:'mr'},
-    {l:'Valor crítico',v:fmtR(critico.reduce((s,r)=>s+r.valor,0)),c:'mr'},
-  ].map(m=>'<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>').join('');
-
-  const tb=document.getElementById('tb-clip-inad');
-  if(!d.length){
-    tb.innerHTML='<tr><td colspan="9"><div class="empty"><div class="ei">✓</div><p>Nenhum inadimplente importado do CLIP.<br>Vá em "Importar do CLIP" para carregar os dados.</p></div></td></tr>';return;
+function readFileOrTxt(fileId, txtId, cb) {
+  var file = document.getElementById(fileId) && document.getElementById(fileId).files[0];
+  var txt = (document.getElementById(txtId) && document.getElementById(txtId).value) || '';
+  if (file) {
+    var fr = new FileReader();
+    fr.onload = function(e){ cb(e.target.result); };
+    fr.readAsText(file, 'UTF-8');
+  } else if (txt) {
+    cb(txt);
+  } else {
+    notify('Selecione um arquivo ou cole o conteudo', 'error');
   }
-  // Agrupar por aluno para somar total devido
-  const totPorAluno={};
-  clipInadimplentes.forEach(r=>{totPorAluno[r.aluno]=(totPorAluno[r.aluno]||0)+r.valor;});
-  tb.innerHTML=d.map(r=>{
-    const emp=empresas.find(e=>e.id===r.eid);
-    const cls=r.dias<=30?'ba':r.dias<=60?'ba':'br';
-    return '<tr class="ov">'+
-      '<td><div style="font-size:12px;font-weight:600">'+r.aluno+'</div>'+(r.turma&&r.turma!=='—'?'<div style="font-size:10px;color:var(--text3)">'+r.turma+'</div>':'')+'</td>'+
-      '<td class="muted">'+r.resp+'</td>'+
-      '<td class="faint">'+r.turma+'</td>'+
-      '<td class="mono" style="font-size:11px">'+r.venc+'</td>'+
-      '<td><span class="badge '+cls+'">'+r.dias+' dias</span></td>'+
-      '<td class="mono tr fw7">'+fmtR(r.valor)+'</td>'+
-      '<td class="mono tr">'+fmtR(totPorAluno[r.aluno]||r.valor)+'</td>'+
-      '<td><div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:'+(emp?emp.cor:'#888')+'"></div><span style="font-size:11px">'+(emp?emp.nome.split(' ').slice(0,2).join(' '):'—')+'</span></div></td>'+
-      '<td><div style="display:flex;gap:3px">'+
-        '<button class="tb-btn sm" onclick="criarLancInad(''+r.id+'')">→ Financeiro</button>'+
-        '<button class="tb-btn sm danger" onclick="delClipInad(''+r.id+'')">✕</button>'+
-      '</div></td>'+
-    '</tr>';
-  }).join('');
 }
 
-function delClipInad(id){clipInadimplentes=clipInadimplentes.filter(x=>x.id!==id);salvar();renderClipInad();}
+// ── INADIMPLÊNCIA ─────────────────────────────────────────────
+function renderInad() {
+  var q = (document.getElementById('inad-q') && document.getElementById('inad-q').value || '').toLowerCase();
+  var empF = document.getElementById('inad-emp') && document.getElementById('inad-emp').value || 'todas';
+  var faixa = +(document.getElementById('inad-faixa') && document.getElementById('inad-faixa').value || 0);
+  var f = getF();
 
-function criarLancInad(id){
-  const r=clipInadimplentes.find(x=>x.id===id);if(!r)return;
-  // Cria um lançamento a receber no financeiro
-  const obj={id:'r'+nextId++,eid:r.eid,desc:'Mensalidade — '+r.aluno,cli:r.resp,
-    venc:r.venc,valor:r.valor,cc:'Comercial',cat:'Mensalidades',
-    status:'pendente',nf:'',obs:'Importado do CLIP Escola',conciliado:false};
-  allReceber.push(obj);
-  clipInadimplentes=clipInadimplentes.filter(x=>x.id!==id);
-  salvar();renderClipInad();notify('Lançamento criado no financeiro!','success');
-}
-
-function renderClipMens(){
-  populateClipEmps();
-  const q=(document.getElementById('cm-q')?.value||'').toLowerCase();
-  const empF=document.getElementById('cm-emp')?.value||'todas';
-  const stF=document.getElementById('cm-status')?.value||'';
-  let d=clipMensalidades.filter(r=>{
-    if(empF!=='todas'&&r.eid!==empF)return false;
-    if(stF==='vencido'&&!isOv(r.venc,r.status))return false;
-    else if(stF==='pendente'&&r.status!=='pendente')return false;
-    else if(stF==='recebido'&&r.status!=='recebido')return false;
-    if(q&&!r.aluno.toLowerCase().includes(q)&&!r.resp.toLowerCase().includes(q))return false;
+  // Lançamentos do sistema
+  var sysVenc = allReceber.filter(function(r) {
+    if (!isOv(r.venc, r.status)) return false;
+    if (empF !== 'todas' && r.eid !== empF) return false;
+    var da = diasAtraso(r.venc);
+    if (faixa === 30 && da > 30) return false;
+    if (faixa === 60 && (da <= 30 || da > 60)) return false;
+    if (faixa === 90 && (da <= 60 || da > 90)) return false;
+    if (faixa === 91 && da <= 90) return false;
+    if (q && !(r.desc||'').toLowerCase().includes(q) && !(r.cli||'').toLowerCase().includes(q)) return false;
     return true;
-  }).sort((a,b)=>a.venc.localeCompare(b.venc));
-
-  const total=d.reduce((s,r)=>s+r.valor,0);
-  const recebidos=d.filter(r=>r.status==='recebido').reduce((s,r)=>s+r.valor,0);
-  const pendentes=d.filter(r=>r.status!=='recebido').reduce((s,r)=>s+r.valor,0);
-  document.getElementById('cm-metrics').innerHTML=[
-    {l:'Total mensalidades (CLIP)',v:fmtR(total),c:'mb'},
-    {l:'Recebidas',v:fmtR(recebidos),c:'mg'},
-    {l:'Pendentes',v:fmtR(pendentes),c:'ma'},
-    {l:'Taxa de recebimento',v:total>0?Math.round(recebidos/total*100)+'%':'—',c:recebidos/Math.max(total,1)>0.8?'mg':'ma'},
-  ].map(m=>'<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>').join('');
-
-  const tb=document.getElementById('tb-clip-mens');
-  if(!d.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><div class="ei">↑</div><p>Nenhuma mensalidade importada do CLIP.<br>Vá em "Importar do CLIP" para carregar os dados.</p></div></td></tr>';return;}
-  tb.innerHTML=d.map(r=>{
-    const emp=empresas.find(e=>e.id===r.eid);
-    const noFin=allReceber.some(x=>x.desc&&x.desc.includes(r.aluno)&&x.venc===r.venc);
-    return '<tr>'+
-      '<td><div style="font-size:12px;font-weight:600">'+r.aluno+'</div></td>'+
-      '<td class="muted">'+r.resp+'</td>'+
-      '<td class="faint">'+r.turma+'</td>'+
-      '<td class="mono" style="font-size:11px">'+r.venc+'</td>'+
-      '<td class="mono '+(r.status==='recebido'?'tg':'tr')+' fw7">'+fmtR(r.valor)+'</td>'+
-      '<td><div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:'+(emp?emp.cor:'#888')+'"></div><span style="font-size:11px">'+(emp?emp.nome.split(' ').slice(0,2).join(' '):'—')+'</span></div></td>'+
-      '<td>'+sbadge(r.status,r.venc)+'</td>'+
-      '<td>'+(noFin?'<span class="badge bg">✓ Sim</span>':'<span class="badge ba">Não</span>')+'</td>'+
-      '<td><div style="display:flex;gap:3px">'+
-        (!noFin?'<button class="tb-btn sm" onclick="enviarParaFinanceiro(''+r.id+'')">→ Financeiro</button>':'')+
-        '<button class="tb-btn sm danger" onclick="delClipMens(''+r.id+'')">✕</button>'+
-      '</div></td>'+
-    '</tr>';
-  }).join('');
-}
-
-function delClipMens(id){clipMensalidades=clipMensalidades.filter(x=>x.id!==id);salvar();renderClipMens();}
-
-function enviarParaFinanceiro(id){
-  const r=clipMensalidades.find(x=>x.id===id);if(!r)return;
-  const obj={id:'r'+nextId++,eid:r.eid,desc:'Mensalidade — '+r.aluno,cli:r.resp,
-    venc:r.venc,valor:r.valor,cc:'Comercial',cat:'Mensalidades',
-    status:r.status==='recebido'?'recebido':'pendente',
-    nf:'',obs:'Importado do CLIP Escola — '+r.turma,conciliado:false};
-  allReceber.push(obj);salvar();renderClipMens();notify('Enviado para o financeiro!','success');
-}
-
-function sincronizarComFinanceiro(){
-  const naoSinc=clipMensalidades.filter(r=>{
-    return !allReceber.some(x=>x.desc&&x.desc.includes(r.aluno)&&x.venc===r.venc);
   });
-  if(!naoSinc.length){notify('Tudo já está sincronizado!','success');return;}
-  naoSinc.forEach(r=>enviarParaFinanceiro(r.id));
-  notify(naoSinc.length+' mensalidades sincronizadas com o financeiro!','success');
-}
 
-function exportClipInadCSV(){
-  const rows=[['Aluno','Responsável','Turma','Vencimento','Dias Atraso','Valor','Escola'],
-    ...clipInadimplentes.map(r=>[r.aluno,r.resp,r.turma,r.venc,r.dias,r.valor,empNome(r.eid)])];
-  const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\n');
-  dlFile('\uFEFF'+csv,'text/csv','clip_inadimplentes.csv');notify('CSV exportado','success');
-}
-
-function exportClipInadPDF(){
-  const {jsPDF}=window.jspdf;if(!jsPDF){notify('PDF não disponível','error');return;}
-  const d=clipInadimplentes.sort((a,b)=>b.dias-a.dias);
-  const total=d.reduce((s,r)=>s+r.valor,0);
-  const doc=new jsPDF();
-  doc.setFillColor(30,45,90);doc.rect(0,0,210,42,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(255,255,255);
-  doc.text('Relatório de Inadimplência — CLIP Escola',14,18);
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,240);
-  doc.text('Grupo Jean Piaget — Importado do CLIP Escola — '+new Date().toLocaleDateString('pt-BR'),14,28);
-  doc.text('Total inadimplente: '+fmtR(total)+' | '+d.length+' alunos',14,36);
-  doc.autoTable({
-    startY:48,
-    head:[['Aluno','Responsável','Turma','Vencimento','Dias','Valor','Escola']],
-    body:d.map(r=>[r.aluno,r.resp,r.turma,r.venc,r.dias+'d',fmtR(r.valor),empNome(r.eid)]),
-    styles:{fontSize:8,cellPadding:3},
-    headStyles:{fillColor:[220,38,38],textColor:255,fontStyle:'bold'},
-    alternateRowStyles:{fillColor:[255,245,245]},
-    didParseCell:function(dt){if(dt.section==='body'&&dt.column.index===4){const dias=parseInt(dt.cell.text[0]);dt.cell.styles.textColor=dias>90?[220,38,38]:dias>60?[217,119,6]:[22,163,74];}},
-    foot:[['','','','TOTAL','',fmtR(total),'']],footStyles:{fillColor:[254,226,226],fontStyle:'bold',textColor:[220,38,38]},
-  });
-  doc.setFontSize(7);doc.setTextColor(150);doc.text('Jean Piaget Sistema Financeiro — CLIP Escola Integration',14,doc.internal.pageSize.height-6);
-  doc.save('CLIP_Inadimplencia_JeanPiaget.pdf');notify('PDF de cobrança exportado!','success');
-}
-
-function exportClipMensCSV(){
-  const rows=[['Aluno','Responsável','Turma','Vencimento','Valor','Status','Escola'],
-    ...clipMensalidades.map(r=>[r.aluno,r.resp,r.turma,r.venc,r.valor,r.status,empNome(r.eid)])];
-  const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\n');
-  dlFile('\uFEFF'+csv,'text/csv','clip_mensalidades.csv');notify('CSV exportado','success');
-}
-
-// ══ INADIMPLÊNCIA ════════════════════════════════════
-function diasAtraso(venc){return Math.floor((new Date(today())-new Date(venc))/(864e5));}
-
-function populateInadEmp(){
-  const s=document.getElementById('inad-emp');
-  if(s)s.innerHTML='<option value="todas">Todas as escolas</option>'+empresas.map(e=>'<option value="'+e.id+'">'+e.nome+'</option>').join('');
-}
-
-function renderInad(){
-  populateInadEmp();
-  const q=(document.getElementById('inad-q')?.value||'').toLowerCase();
-  const empF=document.getElementById('inad-emp')?.value||'todas';
-  const diasF=+document.getElementById('inad-dias')?.value||0;
-  
-  // Buscar todas as contas a receber vencidas
-  let vencidos=allReceber.filter(r=>{
-    if(!isOv(r.venc,r.status))return false;
-    if(empF!=='todas'&&r.eid!==empF)return false;
-    const da=diasAtraso(r.venc);
-    if(diasF===30&&da>30)return false;
-    if(diasF===60&&(da<=30||da>60))return false;
-    if(diasF===90&&(da<=60||da>90))return false;
-    if(diasF===91&&da<=90)return false;
-    if(q&&!r.desc.toLowerCase().includes(q)&&!(r.cli||'').toLowerCase().includes(q))return false;
+  // CLIP inadimplentes
+  var clipVenc = clipData.filter(function(r) {
+    if (r.tipo !== 'inad') return false;
+    if (empF !== 'todas' && r.eid !== empF) return false;
+    var da = r.dias || diasAtraso(r.venc);
+    if (faixa === 30 && da > 30) return false;
+    if (faixa === 60 && (da <= 30 || da > 60)) return false;
+    if (faixa === 90 && (da <= 60 || da > 90)) return false;
+    if (faixa === 91 && da <= 90) return false;
+    if (q && !(r.aluno||'').toLowerCase().includes(q) && !(r.resp||'').toLowerCase().includes(q)) return false;
     return true;
-  }).sort((a,b)=>new Date(a.venc)-new Date(b.venc));
+  });
 
-  const total=vencidos.reduce((s,r)=>s+r.valor,0);
-  const ate30=vencidos.filter(r=>diasAtraso(r.venc)<=30);
-  const ate60=vencidos.filter(r=>diasAtraso(r.venc)>30&&diasAtraso(r.venc)<=60);
-  const acima90=vencidos.filter(r=>diasAtraso(r.venc)>90);
+  var totalSys = sysVenc.reduce(function(a,b){return a+b.valor;},0);
+  var totalClip = clipVenc.reduce(function(a,b){return a+b.valor;},0);
+  var total = totalSys + totalClip;
+  var critico = sysVenc.filter(function(r){return diasAtraso(r.venc)>90;}).length
+              + clipVenc.filter(function(r){return (r.dias||diasAtraso(r.venc))>90;}).length;
 
-  document.getElementById('inad-m').innerHTML=[
+  document.getElementById('inad-metrics').innerHTML = [
     {l:'Total inadimplente',v:fmtR(total),c:'mr'},
-    {l:'Qtd. lançamentos',v:vencidos.length,c:'ma'},
-    {l:'Até 30 dias',v:fmtR(ate30.reduce((s,r)=>s+r.valor,0)),c:'ma'},
-    {l:'Acima de 90 dias',v:fmtR(acima90.reduce((s,r)=>s+r.valor,0)),c:'mr'},
-  ].map(m=>'<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>').join('');
+    {l:'Lancamentos sistema',v:sysVenc.length,c:'ma'},
+    {l:'Alunos CLIP',v:clipVenc.length,c:'ma'},
+    {l:'Criticos >90 dias',v:critico,c:'mr'},
+  ].map(function(m){return '<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>';}).join('');
 
-  const tb=document.getElementById('tb-inad');
-  if(!vencidos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="ei">✓</div><p>Nenhuma inadimplência no período selecionado</p></div></td></tr>';return;}
-  
-  tb.innerHTML=vencidos.map(r=>{
-    const da=diasAtraso(r.venc);
-    const gravidade=da<=30?'ba':da<=60?'ba':da<=90?'br':'br';
-    const emp=empresas.find(e=>e.id===r.eid);
-    return '<tr class="ov"><td><div style="font-size:12px;font-weight:600">'+r.desc+'</div></td>'+
-      '<td class="muted">'+(r.cli||'—')+'</td>'+
-      '<td class="mono" style="font-size:11px">'+r.venc+'</td>'+
-      '<td><span class="badge '+gravidade+'">'+da+' dias</span></td>'+
-      '<td class="mono tr fw7">'+fmtR(r.valor)+'</td>'+
-      '<td><div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:'+(emp?emp.cor:'#888')+'"></div><span style="font-size:11px">'+(emp?emp.nome.split(' ').slice(0,2).join(' '):'—')+'</span></div></td>'+
-      '<td><span class="tag">'+r.cat+'</span></td>'+
-      '<td><div style="display:flex;gap:3px">'+
-        '<button class="tb-btn sm" onclick="toggleSt('receber',''+r.id+'')">✓ Receber</button>'+
-        '<button class="tb-btn sm" onclick="negociar(''+r.id+'')">↺ Negociar</button>'+
-      '</div></td></tr>';
-  }).join('');
+  var rows = '';
+
+  sysVenc.sort(function(a,b){return diasAtraso(b.venc)-diasAtraso(a.venc);}).forEach(function(r) {
+    var da = diasAtraso(r.venc);
+    var cls = da > 60 ? 'br' : 'ba';
+    var emp = empresas.find(function(e){return e.id===r.eid;});
+    rows += '<tr class="ov">'
+      + '<td><div style="font-size:12px;font-weight:600">'+r.desc+'</div></td>'
+      + '<td class="muted">'+(r.cli||'—')+'</td>'
+      + '<td class="mono" style="font-size:11px">'+r.venc+'</td>'
+      + '<td><span class="badge '+cls+'">'+da+' dias</span></td>'
+      + '<td class="mono tr fw7">'+fmtR(r.valor)+'</td>'
+      + '<td>'+(emp?'<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+emp.cor+'"></span>'+emp.nome.split(' ').slice(0,2).join(' ')+'</span>':'—')+'</td>'
+      + '<td><span class="tag">'+r.cat+'</span></td>'
+      + '<td><button class="tb-btn sm" onclick="marcarRecebido(\''+r.id+'\')">Receber</button></td>'
+      + '</tr>';
+  });
+
+  clipVenc.forEach(function(r) {
+    var da = r.dias || diasAtraso(r.venc);
+    var cls = da > 60 ? 'br' : 'ba';
+    var emp = empresas.find(function(e){return e.id===r.eid;});
+    rows += '<tr class="ov">'
+      + '<td><div style="font-size:12px;font-weight:600">'+(r.aluno||'—')+'</div><div style="font-size:10px;color:var(--text3)">'+(r.turma||'')+'</div></td>'
+      + '<td class="muted">'+(r.resp||'—')+'</td>'
+      + '<td class="mono" style="font-size:11px">'+r.venc+'</td>'
+      + '<td><span class="badge '+cls+'">'+da+' dias</span></td>'
+      + '<td class="mono tr fw7">'+fmtR(r.valor)+'</td>'
+      + '<td>'+(emp?'<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+emp.cor+'"></span>'+emp.nome.split(' ').slice(0,2).join(' ')+'</span>':'—')+'</td>'
+      + '<td><span class="clip-badge">CLIP</span></td>'
+      + '<td><button class="tb-btn sm" onclick="criarLancClip(\''+r.id+'\')">Lancamento</button></td>'
+      + '</tr>';
+  });
+
+  var tb = document.getElementById('tb-inad');
+  tb.innerHTML = rows || '<tr><td colspan="8"><div class="empty"><div class="ei">check</div><p>Nenhuma inadimplencia encontrada</p></div></td></tr>';
 }
 
-function negociar(id){
-  const r=allReceber.find(x=>x.id===id);
-  if(!r)return;
-  const novaData=prompt('Nova data de vencimento para negociação (AAAA-MM-DD):',today());
-  if(!novaData)return;
-  r.venc=novaData;r.status='pendente';
-  salvar();renderInad();notify('Vencimento renegociado para '+novaData,'success');
+function marcarRecebido(id) {
+  var r = allReceber.find(function(x){return x.id===id;});
+  if (!r) return;
+  r.status = 'recebido';
+  salvar(); renderInad(); notify('Marcado como recebido','success');
 }
 
-function exportCSVInad(){
-  const vencidos=allReceber.filter(r=>isOv(r.venc,r.status));
-  const rows=[['Descrição','Cliente','Vencimento','Dias Atraso','Valor','Escola','Categoria'],
-    ...vencidos.map(r=>[r.desc,r.cli||'',r.venc,diasAtraso(r.venc),r.valor,empNome(r.eid),r.cat])];
-  const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\n');
-  dlFile('\uFEFF'+csv,'text/csv','inadimplencia.csv');notify('CSV exportado','success');
+function exportCSVInad() {
+  var f = getF();
+  var sysV = allReceber.filter(function(r){return isOv(r.venc,r.status);});
+  var clipV = clipData.filter(function(r){return r.tipo==='inad';});
+  var rows = [['Tipo','Descricao/Aluno','Cliente/Responsavel','Vencimento','Dias','Valor','Escola']];
+  sysV.forEach(function(r){rows.push(['Sistema',r.desc,r.cli||'',r.venc,diasAtraso(r.venc),r.valor,empNome(r.eid)]);});
+  clipV.forEach(function(r){rows.push(['CLIP',r.aluno||'',r.resp||'',r.venc,r.dias||diasAtraso(r.venc),r.valor,empNome(r.eid)]);});
+  var csv = rows.map(function(r){return r.map(function(v){return '"'+(String(v||'').replace(/"/g,'""'))+'"';}).join(';');}).join('\n');
+  dlFile('\uFEFF'+csv,'text/csv','inadimplencia.csv');
+  notify('CSV exportado','success');
 }
 
-function exportPDFInad(){
-  const {jsPDF}=window.jspdf;if(!jsPDF){notify('PDF não disponível','error');return;}
-  const vencidos=allReceber.filter(r=>isOv(r.venc,r.status)).sort((a,b)=>new Date(a.venc)-new Date(b.venc));
-  const total=vencidos.reduce((s,r)=>s+r.valor,0);
-  const doc=new jsPDF();
-  doc.setFillColor(30,45,90);doc.rect(0,0,210,42,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(255,255,255);
-  doc.text('Relatório de Inadimplência',14,18);
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(180,200,240);
-  doc.text('Grupo Jean Piaget — Gerado em '+new Date().toLocaleDateString('pt-BR'),14,28);
-  doc.text('Total inadimplente: '+fmtR(total)+' | '+vencidos.length+' lançamentos',14,36);
+function exportPDFInad() {
+  var jsPDF = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPDF) { notify('PDF nao disponivel','error'); return; }
+  var sysV = allReceber.filter(function(r){return isOv(r.venc,r.status);});
+  var clipV = clipData.filter(function(r){return r.tipo==='inad';});
+  var total = sysV.reduce(function(a,b){return a+b.valor;},0) + clipV.reduce(function(a,b){return a+b.valor;},0);
+  var doc = new jsPDF();
+  doc.setFillColor(30,45,90); doc.rect(0,0,210,42,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(255,255,255);
+  doc.text('Relatorio de Inadimplencia',14,18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(180,200,240);
+  doc.text('Grupo Jean Piaget | '+new Date().toLocaleDateString('pt-BR'),14,28);
+  doc.text('Total inadimplente: '+fmtR(total),14,36);
+  var body = [];
+  sysV.forEach(function(r){ body.push([r.desc, r.cli||'', r.venc, diasAtraso(r.venc)+'d', fmtR(r.valor), empNome(r.eid)]); });
+  clipV.forEach(function(r){ body.push([r.aluno||'', r.resp||'', r.venc, (r.dias||diasAtraso(r.venc))+'d', fmtR(r.valor), empNome(r.eid)]); });
   doc.autoTable({
     startY:48,
-    head:[['Descrição','Cliente','Vencimento','Dias','Valor','Escola']],
-    body:vencidos.map(r=>[r.desc,r.cli||'—',r.venc,diasAtraso(r.venc)+'d',fmtR(r.valor),empNome(r.eid)]),
+    head:[['Descricao/Aluno','Cliente/Resp.','Vencimento','Dias','Valor','Escola']],
+    body: body,
     styles:{fontSize:8,cellPadding:3},
     headStyles:{fillColor:[220,38,38],textColor:255,fontStyle:'bold'},
     alternateRowStyles:{fillColor:[255,245,245]},
-    didParseCell:function(d){if(d.section==='body'&&d.column.index===3){const dias=parseInt(d.cell.text[0]);d.cell.styles.textColor=dias>90?[220,38,38]:dias>60?[217,119,6]:[22,163,74];}},
     foot:[['','','TOTAL','',fmtR(total),'']],
     footStyles:{fillColor:[254,226,226],fontStyle:'bold',textColor:[220,38,38]},
   });
-  doc.setFontSize(7);doc.setTextColor(150);doc.text('Jean Piaget Sistema Financeiro — '+new Date().toLocaleString('pt-BR'),14,doc.internal.pageSize.height-6);
-  doc.save('Inadimplencia_JeanPiaget.pdf');notify('PDF exportado','success');
+  doc.setFontSize(7); doc.setTextColor(150);
+  doc.text('Jean Piaget Sistema Financeiro',14,doc.internal.pageSize.height-6);
+  doc.save('Inadimplencia_JeanPiaget.pdf');
+  notify('PDF exportado','success');
 }
 
-// ══ PREVISÃO DE CAIXA ════════════════════════════════
-function renderPrevisao(){
-  const emp=empresas.find(e=>e.id===currentEmpId);
-  const saldoAtual=(emp&&emp.saldo_ini||0)+fR().reduce((a,b)=>a+b.valor,0)-fP().reduce((a,b)=>a+b.valor,0);
-  
-  // Calcular média mensal histórica
-  const f=getF();
-  const meses=[];let a=f.ai,m=f.mi;
-  while(a<f.af||(a===f.af&&m<=f.mf)){meses.push({a,m});m++;if(m>11){m=0;a++;}}
-  
-  const mediaRec=meses.length>0?fR().reduce((s,x)=>s+x.valor,0)/meses.length:0;
-  const mediaDesp=meses.length>0?fP().reduce((s,x)=>s+x.valor,0)/meses.length:0;
-  
-  // Projeção 6 meses
-  const hoje=new Date();
-  const projecao=[];
-  let saldoAcc=saldoAtual;
-  for(let i=1;i<=6;i++){
-    const dt=new Date(hoje.getFullYear(),hoje.getMonth()+i,1);
-    const mes=dt.getMonth(),ano=dt.getFullYear();
-    // Lançamentos reais pendentes nesse mês
-    const recPend=allReceber.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===mes&&new Date(r.venc).getFullYear()===ano&&r.status!=='recebido').reduce((s,x)=>s+x.valor,0);
-    const pagPend=allPagar.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===mes&&new Date(r.venc).getFullYear()===ano&&r.status!=='pago').reduce((s,x)=>s+x.valor,0);
-    const entradas=recPend||mediaRec;
-    const saidas=pagPend||mediaDesp;
-    saldoAcc+=entradas-saidas;
-    projecao.push({label:MESES3[mes]+'/'+String(ano).slice(2),entradas,saidas,saldo:saldoAcc,temReal:recPend>0||pagPend>0});
+// ── PREVISÃO DE CAIXA ─────────────────────────────────────────
+function renderPrevisao() {
+  var emp = empresas.find(function(e){return e.id===currentEmpId;});
+  var p = fP(), r = fR();
+  var tR = r.reduce(function(a,b){return a+b.valor;},0);
+  var tD = p.reduce(function(a,b){return a+b.valor;},0);
+  var f = getF();
+  var nMeses = Math.max(1, (f.mf - f.mi + 1) + (f.af - f.ai) * 12);
+  var mediaR = tR / nMeses;
+  var mediaD = tD / nMeses;
+  var saldoAtual = ((emp && emp.saldo_ini) || 0) + tR - tD;
+
+  document.getElementById('prev-metrics').innerHTML = [
+    {l:'Saldo estimado atual',v:fmtR(saldoAtual),c:saldoAtual>=0?'mg':'mr'},
+    {l:'Media mensal receita',v:fmtR(mediaR),c:'mg'},
+    {l:'Media mensal despesa',v:fmtR(mediaD),c:'mr'},
+    {l:'Projecao 6 meses',v:fmtR(saldoAtual + (mediaR-mediaD)*6),c:'mb'},
+  ].map(function(m){return '<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>';}).join('');
+
+  var hoje = new Date();
+  var proj = [];
+  var saldoAcc = saldoAtual;
+  for (var i=1; i<=6; i++) {
+    var dt = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
+    var mes = dt.getMonth(), ano = dt.getFullYear();
+    var rPend = allReceber.filter(function(r){
+      return r.eid===currentEmpId && new Date(r.venc).getMonth()===mes && new Date(r.venc).getFullYear()===ano && r.status!=='recebido';
+    }).reduce(function(s,x){return s+x.valor;},0);
+    var pPend = allPagar.filter(function(r){
+      return r.eid===currentEmpId && new Date(r.venc).getMonth()===mes && new Date(r.venc).getFullYear()===ano && r.status!=='pago';
+    }).reduce(function(s,x){return s+x.valor;},0);
+    var ent = rPend || mediaR;
+    var sai = pPend || mediaD;
+    var temReal = rPend > 0 || pPend > 0;
+    saldoAcc += ent - sai;
+    proj.push({lbl:MESES3[mes]+'/'+String(ano).slice(2), ent:ent, sai:sai, saldo:saldoAcc, real:temReal});
   }
 
-  document.getElementById('prev-m').innerHTML=[
-    {l:'Saldo atual estimado',v:fmtR(saldoAtual),c:saldoAtual>=0?'mg':'mr'},
-    {l:'Média mensal receita',v:fmtR(mediaRec),c:'mg'},
-    {l:'Média mensal despesa',v:fmtR(mediaDesp),c:'mr'},
-    {l:'Saldo proj. 6 meses',v:fmtR(projecao[5]&&projecao[5].saldo||0),c:(projecao[5]&&projecao[5].saldo>=0)?'mb':'mr'},
-  ].map(m=>'<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>').join('');
+  var maxV = Math.max.apply(null, proj.map(function(x){return Math.max(x.ent,x.sai);}).concat([1]));
+  var H = 110;
+  document.getElementById('prev-chart').innerHTML = '<div class="prev-bar-wrap">'
+    + proj.map(function(x){
+        var hr = Math.round(x.ent/maxV*H);
+        var hs = Math.round(x.sai/maxV*H);
+        var op = x.real ? '0.9' : '0.4';
+        return '<div class="prev-bar-col">'
+          + '<div class="prev-bar-inner">'
+            + '<div class="prev-bar" style="height:'+hr+'px;background:rgba(22,163,74,'+op+')" title="Entradas: '+fmtR(x.ent)+'"></div>'
+            + '<div class="prev-bar" style="height:'+hs+'px;background:rgba(220,38,38,'+op+')" title="Saidas: '+fmtR(x.sai)+'"></div>'
+          + '</div>'
+          + '<div class="prev-bar-lbl">'+x.lbl+'</div>'
+          + '<div class="prev-bar-sub">'+(x.real?'real':'proj.')+'</div>'
+        + '</div>';
+      }).join('')
+    + '</div>'
+    + '<div style="display:flex;gap:14px;font-size:10px;color:var(--text3);margin-top:6px">'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#16a34a"></span>Entradas</span>'
+      + '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#dc2626"></span>Saidas</span>'
+    + '</div>';
 
-  // Gráfico de barras da projeção
-  const maxV=Math.max(...projecao.map(x=>Math.max(x.entradas,x.saidas)),1);
-  document.getElementById('prev-chart').innerHTML='<div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding-bottom:24px">'+
-    projecao.map(x=>'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:40px">'+
-      '<div style="display:flex;gap:3px;align-items:flex-end;height:120px">'+
-        '<div style="width:14px;background:rgba(22,163,74,'+(x.temReal?'0.9':'0.4')+');border-radius:3px 3px 0 0;height:'+Math.round(x.entradas/maxV*120)+'px" title="Entradas: '+fmtR(x.entradas)+(x.temReal?' (real)':' (projeção)')+'"></div>'+
-        '<div style="width:14px;background:rgba(220,38,38,'+(x.temReal?'0.9':'0.4')+');border-radius:3px 3px 0 0;height:'+Math.round(x.saidas/maxV*120)+'px" title="Saídas: '+fmtR(x.saidas)+'"></div>'+
-      '</div>'+
-      '<div style="font-size:9px;color:var(--text2)">'+x.label+'</div>'+
-      '<div style="font-size:8px;color:var(--text3)">'+(x.temReal?'real':'proj.')+'</div>'+
-    '</div>').join('')+
-  '</div><div style="display:flex;gap:14px;font-size:10px;color:var(--text3);margin-top:4px">'+
-    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Entradas</span>'+
-    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#dc2626;border-radius:2px"></span>Saídas</span>'+
-    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(22,163,74,0.4);border-radius:2px"></span>Projetado (média)</span>'+
-  '</div>';
+  document.getElementById('prev-saldo').innerHTML = proj.map(function(x){
+    return '<div class="cfrow">'
+      + '<div class="cfdot '+(x.saldo>=0?'d-in':'d-out')+'"></div>'
+      + '<div style="flex:1"><div style="font-size:12px;font-weight:600">'+x.lbl+'</div>'
+        + '<div style="font-size:10px;color:var(--text3)">Entradas: '+fmtR(x.ent)+' | Saidas: '+fmtR(x.sai)+'</div></div>'
+      + '<div class="mono '+(x.saldo>=0?'tg':'tr')+' fw7" style="font-size:13px">'+fmtR(x.saldo)+'</div>'
+    + '</div>';
+  }).join('');
 
-  // Saldo acumulado
-  let saldoLine=saldoAtual;
-  document.getElementById('prev-saldo').innerHTML=projecao.map(x=>'<div class="cfrow">'+
-    '<div class="cfdot '+(x.saldo>=0?'d-in':'d-out')+'"></div>'+
-    '<div style="flex:1"><div style="font-size:12px;font-weight:600">'+x.label+'</div>'+
-    '<div style="font-size:10px;color:var(--text3)">Entradas '+fmtR(x.entradas)+' | Saídas '+fmtR(x.saidas)+'</div></div>'+
-    '<div class="mono '+(x.saldo>=0?'tg':'tr')+' fw7" style="font-size:13px">'+fmtR(x.saldo)+'</div>'+
-  '</div>').join('');
+  var prox = allPagar.concat(allReceber).filter(function(r){
+    if (r.eid !== currentEmpId) return false;
+    var d = (new Date(r.venc) - new Date(today())) / 86400000;
+    return d >= -1 && d <= 90 && r.status !== 'pago' && r.status !== 'recebido';
+  }).sort(function(a,b){return a.venc.localeCompare(b.venc);});
 
-  // Calendário próximos 90 dias
-  const proximos=[...allPagar.filter(r=>r.eid===currentEmpId&&r.status!=='pago'),...allReceber.filter(r=>r.eid===currentEmpId&&r.status!=='recebido')]
-    .filter(r=>{const d=(new Date(r.venc)-new Date(today()))/(864e5);return d>=-1&&d<=90;})
-    .sort((a,b)=>a.venc.localeCompare(b.venc));
-  document.getElementById('prev-calendario').innerHTML=proximos.map(r=>'<div class="cfrow">'+
-    '<div class="cfdot '+(r.cli?'d-in':'d-out')+'"></div>'+
-    '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.desc+'</div>'+
-    '<div style="font-size:10px;color:var(--text3)">'+(r.forn||r.cli||'—')+' • Vence: '+r.venc+'</div></div>'+
-    '<div class="mono '+(r.cli?'tg':'tr')+' fw7" style="font-size:12px">'+fmtR(r.valor)+'</div>'+
-  '</div>').join('')||'<div class="empty"><p>Nenhum vencimento nos próximos 90 dias</p></div>';
+  document.getElementById('prev-cal').innerHTML = prox.length ? prox.map(function(r){
+    return '<div class="cfrow">'
+      + '<div class="cfdot '+(r.cli?'d-in':'d-out')+'"></div>'
+      + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.desc+'</div>'
+        + '<div style="font-size:10px;color:var(--text3)">'+(r.forn||r.cli||'')+'  Vence: '+r.venc+'</div></div>'
+      + '<div class="mono '+(r.cli?'tg':'tr')+' fw7" style="font-size:12px">'+fmtR(r.valor)+'</div>'
+    + '</div>';
+  }).join('') : '<div class="empty"><p>Nenhum vencimento nos proximos 90 dias</p></div>';
 }
 
-// ══ GRÁFICOS AVANÇADOS ═══════════════════════════════
-function barChart(data,colors,height){
-  const maxV=Math.max(...data.map(x=>x.v),1);
-  return '<div style="display:flex;align-items:flex-end;gap:6px;height:'+height+'px;padding-bottom:20px">'+
-    data.map((x,i)=>'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0">'+
-      '<div style="width:100%;background:'+(colors[i%colors.length])+';border-radius:3px 3px 0 0;height:'+Math.round(x.v/maxV*(height-20))+'px;opacity:.85;min-height:2px" title="'+x.label+': '+fmtR(x.v)+'"></div>'+
-      '<div style="font-size:9px;color:var(--text2);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%">'+x.label+'</div>'+
-    '</div>').join('')+
-  '</div>';
-}
-
-function renderGraficos(){
-  // Comparativo entre escolas - barras agrupadas
-  const maxV=Math.max(...empresas.map(e=>{
-    const r=fR(e.id).reduce((a,b)=>a+b.valor,0);
-    const p=fP(e.id).reduce((a,b)=>a+b.valor,0);
+// ── GRÁFICOS AVANÇADOS ────────────────────────────────────────
+function renderGraficos() {
+  // Comparativo escolas
+  var maxV = Math.max.apply(null, empresas.map(function(e){
+    var r = fR(e.id).reduce(function(a,b){return a+b.valor;},0);
+    var p = fP(e.id).reduce(function(a,b){return a+b.valor;},0);
     return Math.max(r,p);
-  }),1);
-  const H=160;
-  document.getElementById('graf-comp').innerHTML='<div style="display:flex;gap:16px;flex-wrap:wrap">'+
-    empresas.map(e=>{
-      const r=fR(e.id).reduce((a,b)=>a+b.valor,0);
-      const p=fP(e.id).reduce((a,b)=>a+b.valor,0);
-      const res=r-p;
-      const margem=r>0?(res/r*100):0;
-      return '<div style="flex:1;min-width:200px;background:var(--bg3);border-radius:var(--r);padding:12px">'+
-        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">'+
-          '<div style="width:10px;height:10px;border-radius:50%;background:'+e.cor+'"></div>'+
-          '<span style="font-weight:700;font-size:12px">'+e.nome.split(' ').slice(0,3).join(' ')+'</span>'+
-        '</div>'+
-        '<div style="display:flex;gap:4px;align-items:flex-end;height:'+H+'px;margin-bottom:6px">'+
-          '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
-            '<div style="width:100%;background:rgba(22,163,74,.8);border-radius:3px 3px 0 0;height:'+Math.round(r/maxV*H)+'px" title="Receita: '+fmtR(r)+'"></div>'+
-            '<div style="font-size:9px;color:var(--text3)">Rec.</div>'+
-          '</div>'+
-          '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
-            '<div style="width:100%;background:rgba(220,38,38,.8);border-radius:3px 3px 0 0;height:'+Math.round(p/maxV*H)+'px" title="Despesa: '+fmtR(p)+'"></div>'+
-            '<div style="font-size:9px;color:var(--text3)">Desp.</div>'+
-          '</div>'+
-          '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'+
-            '<div style="width:100%;background:'+(res>=0?'rgba(37,99,235,.8)':'rgba(220,38,38,.5)')+';border-radius:3px 3px 0 0;height:'+Math.round(Math.abs(res)/maxV*H)+'px" title="Resultado: '+fmtR(res)+'"></div>'+
-            '<div style="font-size:9px;color:var(--text3)">Res.</div>'+
-          '</div>'+
-        '</div>'+
-        '<div style="font-size:11px;color:var(--text2)">Receita: <span class="tg mono">'+fmtR(r)+'</span></div>'+
-        '<div style="font-size:11px;color:var(--text2)">Despesa: <span class="tr mono">'+fmtR(p)+'</span></div>'+
-        '<div style="font-size:11px;font-weight:600">Resultado: <span class="mono '+(res>=0?'tg':'tr')+'">'+fmtR(res)+'</span></div>'+
-        '<div style="font-size:11px;color:var(--text2)">Margem: <span class="mono '+(margem>=0?'tg':'tr')+'">'+margem.toFixed(1)+'%</span></div>'+
-      '</div>';
-    }).join('')+
-  '</div>';
+  }).concat([1]));
+  var H = 150;
+  document.getElementById('graf-comp').innerHTML = empresas.map(function(e){
+    var r = fR(e.id).reduce(function(a,b){return a+b.valor;},0);
+    var p = fP(e.id).reduce(function(a,b){return a+b.valor;},0);
+    var res = r - p;
+    var marg = r > 0 ? (res/r*100) : 0;
+    return '<div class="graf-school-card">'
+      + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">'
+        + '<div style="width:10px;height:10px;border-radius:50%;background:'+e.cor+'"></div>'
+        + '<span style="font-weight:700;font-size:12px">'+e.nome.split(' ').slice(0,3).join(' ')+'</span>'
+      + '</div>'
+      + '<div style="display:flex;gap:4px;align-items:flex-end;height:'+H+'px;margin-bottom:8px">'
+        + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+          + '<div style="width:100%;background:rgba(22,163,74,0.8);border-radius:3px 3px 0 0;height:'+Math.round(r/maxV*H)+'px;min-height:2px" title="Receita: '+fmtR(r)+'"></div>'
+          + '<div style="font-size:9px;color:var(--text3)">Rec.</div>'
+        + '</div>'
+        + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+          + '<div style="width:100%;background:rgba(220,38,38,0.8);border-radius:3px 3px 0 0;height:'+Math.round(p/maxV*H)+'px;min-height:2px" title="Despesa: '+fmtR(p)+'"></div>'
+          + '<div style="font-size:9px;color:var(--text3)">Desp.</div>'
+        + '</div>'
+        + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+          + '<div style="width:100%;background:'+(res>=0?'rgba(37,99,235,0.8)':'rgba(220,38,38,0.5)')+';border-radius:3px 3px 0 0;height:'+Math.round(Math.abs(res)/maxV*H)+'px;min-height:2px" title="Resultado: '+fmtR(res)+'"></div>'
+          + '<div style="font-size:9px;color:var(--text3)">Res.</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">Receita: <span class="tg mono">'+fmtR(r)+'</span></div>'
+      + '<div style="font-size:11px;color:var(--text2)">Despesa: <span class="tr mono">'+fmtR(p)+'</span></div>'
+      + '<div style="font-size:11px;font-weight:600">Resultado: <span class="mono '+(res>=0?'tg':'tr')+'">'+fmtR(res)+'</span></div>'
+      + '<div style="font-size:11px;color:var(--text2)">Margem: <span class="mono '+(marg>=0?'tg':'tr')+'">'+marg.toFixed(1)+'%</span></div>'
+    + '</div>';
+  }).join('');
 
-  // Evolução anual - todos os meses do ano
-  const anoAtual=+document.getElementById('f-ai').value;
-  const mesesAno=Array.from({length:12},(_,i)=>({m:i,a:anoAtual}));
-  const recAnual=mesesAno.map(x=>({label:MESES3[x.m],v:allReceber.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===x.m&&new Date(r.venc).getFullYear()===x.a).reduce((s,r)=>s+r.valor,0)}));
-  const despAnual=mesesAno.map(x=>({label:MESES3[x.m],v:allPagar.filter(r=>r.eid===currentEmpId&&new Date(r.venc).getMonth()===x.m&&new Date(r.venc).getFullYear()===x.a).reduce((s,r)=>s+r.valor,0)}));
-  document.getElementById('graf-rec-anual').innerHTML=barChart(recAnual,['rgba(22,163,74,0.8)'],120);
-  document.getElementById('graf-desp-anual').innerHTML=barChart(despAnual,['rgba(220,38,38,0.8)'],120);
+  // Evolucao anual
+  var anoAtual = +(document.getElementById('f-ai') && document.getElementById('f-ai').value || new Date().getFullYear());
+  var mesesAno = Array.from({length:12}, function(_,i){return i;});
+  var HG = 100;
 
-  // Pizza participação receita por escola
-  const totalRec=fRAll().reduce((s,r)=>s+r.valor,0)||1;
-  const cores=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899'];
-  document.getElementById('graf-pizza-rec').innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
-    empresas.map((e,i)=>{
-      const r=fR(e.id).reduce((s,x)=>s+x.valor,0);
-      const pct=Math.round(r/totalRec*100);
-      return '<div class="prow">'+
-        '<div class="plbl" style="display:flex;align-items:center;gap:5px">'+
-          '<div style="width:8px;height:8px;border-radius:50%;background:'+e.cor+';flex-shrink:0"></div>'+
-          e.nome.split(' ').slice(0,2).join(' ')+
-        '</div>'+
-        '<div class="pbg"><div class="pfill" style="width:'+pct+'%;background:'+e.cor+'"></div></div>'+
-        '<div class="pval">'+pct+'%</div>'+
-      '</div>';
-    }).join('')+
-  '</div>';
+  function barChart(data, color) {
+    var maxV2 = Math.max.apply(null, data.map(function(x){return x.v;}).concat([1]));
+    return '<div style="display:flex;align-items:flex-end;gap:3px;height:'+(HG+20)+'px;padding-bottom:20px">'
+      + data.map(function(x){
+          return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0">'
+            + '<div style="width:100%;background:'+color+';border-radius:2px 2px 0 0;height:'+Math.round(x.v/maxV2*HG)+'px;min-height:1px;opacity:0.8" title="'+x.lbl+': '+fmtR(x.v)+'"></div>'
+            + '<div style="font-size:8px;color:var(--text3)">'+x.lbl+'</div>'
+          + '</div>';
+        }).join('')
+    + '</div>';
+  }
 
-  // Top 5 categorias despesa
-  const despCats={};
-  fPAll().forEach(x=>{despCats[x.cat]=(despCats[x.cat]||0)+x.valor;});
-  const top5=Object.entries(despCats).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const maxD=Math.max(...top5.map(x=>x[1]),1);
-  document.getElementById('graf-top-desp').innerHTML='<div style="display:flex;flex-direction:column;gap:7px">'+
-    top5.map(([k,v],i)=>'<div class="prow">'+
-      '<div class="plbl">'+k.split(' ').slice(0,2).join(' ')+'</div>'+
-      '<div class="pbg"><div class="pfill" style="width:'+Math.round(v/maxD*100)+'%;background:rgba(220,38,38,'+(0.9-i*0.15)+')"></div></div>'+
-      '<div class="pval tr">'+fmtR(v)+'</div>'+
-    '</div>').join('')+
-  '</div>';
+  var recAnual = mesesAno.map(function(m){
+    return {lbl:MESES3[m], v:allReceber.filter(function(r){return r.eid===currentEmpId&&new Date(r.venc).getMonth()===m&&new Date(r.venc).getFullYear()===anoAtual;}).reduce(function(s,r){return s+r.valor;},0)};
+  });
+  var despAnual = mesesAno.map(function(m){
+    return {lbl:MESES3[m], v:allPagar.filter(function(r){return r.eid===currentEmpId&&new Date(r.venc).getMonth()===m&&new Date(r.venc).getFullYear()===anoAtual;}).reduce(function(s,r){return s+r.valor;},0)};
+  });
+  document.getElementById('graf-rec').innerHTML = barChart(recAnual, '#16a34a');
+  document.getElementById('graf-desp').innerHTML = barChart(despAnual, '#dc2626');
 
-  // Margem líquida por escola
-  document.getElementById('graf-margem').innerHTML='<div style="display:flex;flex-direction:column;gap:10px">'+
-    empresas.map(e=>{
-      const r=fR(e.id).reduce((s,x)=>s+x.valor,0);
-      const p=fP(e.id).reduce((s,x)=>s+x.valor,0);
-      const margem=r>0?((r-p)/r*100):0;
-      const ok=margem>=0;
-      return '<div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px">'+
-        '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
-          '<span style="font-size:11px;font-weight:600">'+e.nome.split(' ').slice(0,2).join(' ')+'</span>'+
-          '<span class="mono '+(ok?'tg':'tr')+' fw7" style="font-size:13px">'+margem.toFixed(1)+'%</span>'+
-        '</div>'+
-        '<div class="pbg" style="height:8px"><div class="pfill" style="width:'+Math.min(Math.abs(margem),100)+'%;background:'+(ok?e.cor:'var(--red)')+'"></div></div>'+
-      '</div>';
-    }).join('')+
-  '</div>';
+  // Pizza participacao
+  var totalRec = fRAll().reduce(function(s,r){return s+r.valor;},0) || 1;
+  document.getElementById('graf-pizza').innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">'
+    + empresas.map(function(e){
+        var r = fR(e.id).reduce(function(s,x){return s+x.valor;},0);
+        var pct = Math.round(r/totalRec*100);
+        return '<div class="prow">'
+          + '<div class="plbl" style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:'+e.cor+';flex-shrink:0"></div>'+e.nome.split(' ').slice(0,2).join(' ')+'</div>'
+          + '<div class="pbg"><div class="pfill" style="width:'+pct+'%;background:'+e.cor+'"></div></div>'
+          + '<div class="pval">'+pct+'%</div>'
+        + '</div>';
+      }).join('')
+    + '</div>';
+
+  // Top 5 categorias
+  var dC = {};
+  fPAll().forEach(function(x){ dC[x.cat] = (dC[x.cat]||0) + x.valor; });
+  var top5 = Object.entries(dC).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var maxD = Math.max.apply(null, top5.map(function(x){return x[1];}).concat([1]));
+  document.getElementById('graf-top').innerHTML = '<div style="display:flex;flex-direction:column;gap:7px">'
+    + top5.map(function(kv, i){
+        return '<div class="prow">'
+          + '<div class="plbl">'+kv[0].split(' ').slice(0,2).join(' ')+'</div>'
+          + '<div class="pbg"><div class="pfill" style="width:'+Math.round(kv[1]/maxD*100)+'%;background:rgba(220,38,38,'+(0.9-i*0.15)+')"></div></div>'
+          + '<div class="pval tr">'+fmtR(kv[1])+'</div>'
+        + '</div>';
+      }).join('')
+    + '</div>';
+
+  // Margem por escola
+  document.getElementById('graf-margem').innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">'
+    + empresas.map(function(e){
+        var r = fR(e.id).reduce(function(s,x){return s+x.valor;},0);
+        var p = fP(e.id).reduce(function(s,x){return s+x.valor;},0);
+        var marg = r > 0 ? ((r-p)/r*100) : 0;
+        return '<div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px">'
+          + '<div style="display:flex;justify-content:space-between;margin-bottom:5px">'
+            + '<span style="font-size:11px;font-weight:600">'+e.nome.split(' ').slice(0,2).join(' ')+'</span>'
+            + '<span class="mono '+(marg>=0?'tg':'tr')+' fw7" style="font-size:13px">'+marg.toFixed(1)+'%</span>'
+          + '</div>'
+          + '<div class="pbg" style="height:8px"><div class="pfill" style="width:'+Math.min(Math.abs(marg),100)+'%;background:'+(marg>=0?e.cor:'var(--red)')+'"></div></div>'
+        + '</div>';
+      }).join('')
+    + '</div>';
 }
+
+// ── CLIP ESCOLA ───────────────────────────────────────────────
+function renderClipImport() {
+  ['clip-emp-m','clip-emp-i'].forEach(function(id){
+    var s = document.getElementById(id); if(!s) return;
+    s.innerHTML = empresas.map(function(e){
+      return '<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>';
+    }).join('');
+  });
+}
+
+function importarClipMens() {
+  readFileOrTxt('clip-file-m','clip-txt-m', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+    var eid = document.getElementById('clip-emp-m') && document.getElementById('clip-emp-m').value || currentEmpId;
+    var add = 0, upd = 0;
+    rows.forEach(function(r) {
+      var aluno = detectCol(r,['aluno','nome','estudante','student','name']);
+      var resp  = detectCol(r,['responsavel','responsible','pai','mae','resp']);
+      var venc  = parseDataClip(detectCol(r,['vencimento','venc','data','due','prazo','date']));
+      var valor = parseValorClip(detectCol(r,['valor','value','mensalidade','amount','preco']));
+      var stRaw = (detectCol(r,['status','situacao','pago']) || '').toLowerCase();
+      var status = (stRaw.includes('pago')||stRaw.includes('recebido')||stRaw.includes('quitado')||stRaw.includes('sim')) ? 'recebido' : 'pendente';
+      var turma  = detectCol(r,['turma','classe','serie','class','grupo']);
+      if (!aluno && !valor) return;
+      var existe = clipData.find(function(m){return m.tipo==='mens'&&m.aluno===aluno&&m.venc===venc&&m.eid===eid;});
+      if (existe) { existe.status=status; existe.valor=valor||existe.valor; upd++; }
+      else { clipData.push({id:'cm'+(nextId++),eid:eid,tipo:'mens',aluno:aluno||'Aluno',resp:resp||'Responsavel',turma:turma||'—',venc:venc,valor:valor,status:status}); add++; }
+    });
+    salvar();
+    document.getElementById('clip-msg-m').innerHTML = '<div class="alert al-s">'+add+' importadas, '+upd+' atualizadas.</div>';
+    notify(add+' mensalidades importadas do CLIP','success');
+  });
+}
+
+function importarClipInad() {
+  readFileOrTxt('clip-file-i','clip-txt-i', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+    var eid = document.getElementById('clip-emp-i') && document.getElementById('clip-emp-i').value || currentEmpId;
+    var add = 0, upd = 0;
+    rows.forEach(function(r) {
+      var aluno = detectCol(r,['aluno','nome','estudante']);
+      var resp  = detectCol(r,['responsavel','responsible','resp','pai','mae']);
+      var venc  = parseDataClip(detectCol(r,['vencimento','venc','data','due']));
+      var valor = parseValorClip(detectCol(r,['valor','value','mensalidade','amount']));
+      var dias  = parseInt(detectCol(r,['dias','atraso','days'])||'0') || diasAtraso(venc);
+      var turma = detectCol(r,['turma','classe','serie','class']);
+      if (!aluno && !valor) return;
+      var existe = clipData.find(function(m){return m.tipo==='inad'&&m.aluno===aluno&&m.venc===venc&&m.eid===eid;});
+      if (existe) { existe.valor=valor||existe.valor; existe.dias=dias; upd++; }
+      else { clipData.push({id:'ci'+(nextId++),eid:eid,tipo:'inad',aluno:aluno||'Aluno',resp:resp||'Responsavel',turma:turma||'—',venc:venc,valor:valor,dias:dias}); add++; }
+    });
+    salvar();
+    document.getElementById('clip-msg-i').innerHTML = '<div class="alert al-s">'+add+' importados, '+upd+' atualizados.</div>';
+    notify(add+' inadimplentes importados do CLIP','success');
+  });
+}
+
+function criarLancClip(id) {
+  var r = clipData.find(function(x){return x.id===id;});
+  if (!r) return;
+  var obj = {id:'r'+(nextId++),eid:r.eid,desc:'Mensalidade - '+(r.aluno||''),cli:r.resp||'',
+    venc:r.venc,valor:r.valor,cc:'Comercial',cat:'Mensalidades',
+    status:'pendente',nf:'',obs:'Importado do CLIP Escola',conciliado:false,parc:'1/1'};
+  allReceber.push(obj);
+  clipData = clipData.filter(function(x){return x.id!==id;});
+  salvar(); renderInad();
+  notify('Lancamento criado no financeiro!','success');
+}
+
+function renderClipAlunos() {
+  ['ca-emp'].forEach(function(id){
+    var s = document.getElementById(id); if(!s) return;
+    s.innerHTML = '<option value="todas">Todas</option>'+empresas.map(function(e){return '<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>';}).join('');
+  });
+  var q = (document.getElementById('ca-q')&&document.getElementById('ca-q').value||'').toLowerCase();
+  var empF = document.getElementById('ca-emp')&&document.getElementById('ca-emp').value||'todas';
+  var tipo = document.getElementById('ca-tipo')&&document.getElementById('ca-tipo').value||'todas';
+
+  var d = clipData.filter(function(r){
+    if (empF!=='todas'&&r.eid!==empF) return false;
+    if (tipo==='mens'&&r.tipo!=='mens') return false;
+    if (tipo==='inad'&&r.tipo!=='inad') return false;
+    if (q&&!(r.aluno||'').toLowerCase().includes(q)&&!(r.resp||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  var totMens = d.filter(function(r){return r.tipo==='mens';}).reduce(function(s,r){return s+r.valor;},0);
+  var totInad = d.filter(function(r){return r.tipo==='inad';}).reduce(function(s,r){return s+r.valor;},0);
+  var recebidos = d.filter(function(r){return r.status==='recebido';}).reduce(function(s,r){return s+r.valor;},0);
+
+  document.getElementById('ca-metrics').innerHTML = [
+    {l:'Total mensalidades',v:fmtR(totMens),c:'mb'},
+    {l:'Total inadimplentes',v:fmtR(totInad),c:'mr'},
+    {l:'Recebidos',v:fmtR(recebidos),c:'mg'},
+    {l:'Registros CLIP',v:d.length,c:'ma'},
+  ].map(function(m){return '<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>';}).join('');
+
+  var tb = document.getElementById('tb-clip-alunos');
+  if (!d.length) { tb.innerHTML='<tr><td colspan="10"><div class="empty"><div class="ei">CLIP</div><p>Nenhum dado importado do CLIP Escola.<br>Va em Importar do CLIP para carregar os dados.</p></div></td></tr>'; return; }
+
+  tb.innerHTML = d.map(function(r) {
+    var emp = empresas.find(function(e){return e.id===r.eid;});
+    var noFin = r.tipo==='mens' && allReceber.some(function(x){return x.desc&&x.desc.includes(r.aluno||'')&&x.venc===r.venc;});
+    var da = r.tipo==='inad' ? (r.dias||diasAtraso(r.venc)) : (isOv(r.venc,r.status)?diasAtraso(r.venc):0);
+    return '<tr>'
+      + '<td><div style="font-size:12px;font-weight:600">'+(r.aluno||'—')+'</div></td>'
+      + '<td class="muted">'+(r.resp||'—')+'</td>'
+      + '<td class="faint">'+(r.turma||'—')+'</td>'
+      + '<td class="mono" style="font-size:11px">'+r.venc+'</td>'
+      + '<td class="mono '+(r.tipo==='inad'?'tr':'tg')+' fw7">'+fmtR(r.valor)+'</td>'
+      + '<td>'+(da>0?'<span class="badge '+(da>60?'br':'ba')+'">'+da+'d</span>':'—')+'</td>'
+      + '<td>'+(emp?'<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+emp.cor+'"></span>'+emp.nome.split(' ').slice(0,2).join(' ')+'</span>':'—')+'</td>'
+      + '<td><span class="clip-badge">'+(r.tipo==='inad'?'Inadimplente':'Mensalidade')+'</span></td>'
+      + '<td>'+(noFin?'<span class="badge bg">Sim</span>':'<span class="badge ba">Nao</span>')+'</td>'
+      + '<td><div style="display:flex;gap:3px">'
+          + (!noFin ? '<button class="tb-btn sm" onclick="enviarClipFin(\''+r.id+'\')">Financeiro</button>' : '')
+          + '<button class="tb-btn sm danger" onclick="delClip(\''+r.id+'\')">X</button>'
+        + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function enviarClipFin(id) {
+  var r = clipData.find(function(x){return x.id===id;});
+  if (!r) return;
+  var obj = {id:'r'+(nextId++),eid:r.eid,desc:'Mensalidade - '+(r.aluno||''),cli:r.resp||'',
+    venc:r.venc,valor:r.valor,cc:'Comercial',cat:'Mensalidades',
+    status:r.status==='recebido'?'recebido':'pendente',
+    nf:'',obs:'CLIP - '+(r.turma||''),conciliado:false,parc:'1/1'};
+  allReceber.push(obj);
+  salvar(); renderClipAlunos();
+  notify('Enviado para o financeiro!','success');
+}
+
+function delClip(id) {
+  clipData = clipData.filter(function(x){return x.id!==id;});
+  salvar(); renderClipAlunos();
+  notify('Registro removido','warning');
+}
+
+function sincronizarClip() {
+  var naoSinc = clipData.filter(function(r){
+    return !allReceber.some(function(x){return x.desc&&x.desc.includes(r.aluno||'')&&x.venc===r.venc;});
+  });
+  if (!naoSinc.length) { notify('Tudo ja esta sincronizado!','success'); return; }
+  naoSinc.forEach(function(r){ enviarClipFin(r.id); });
+  notify(naoSinc.length+' registros sincronizados!','success');
+}
+
+function exportClipCSV() {
+  var rows = [['Tipo','Aluno','Responsavel','Turma','Vencimento','Valor','Status/Dias','Escola']];
+  clipData.forEach(function(r){
+    rows.push([r.tipo==='inad'?'Inadimplente':'Mensalidade',r.aluno||'',r.resp||'',r.turma||'',r.venc,r.valor,r.tipo==='inad'?(r.dias||diasAtraso(r.venc))+'d':r.status,empNome(r.eid)]);
+  });
+  var csv = rows.map(function(r){return r.map(function(v){return '"'+(String(v||'').replace(/"/g,'""'))+'"';}).join(';');}).join('\n');
+  dlFile('\uFEFF'+csv,'text/csv','clip_escola.csv');
+  notify('CSV exportado','success');
+}
+
+function exportClipPDF() {
+  var jsPDF = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPDF) { notify('PDF nao disponivel','error'); return; }
+  var inad = clipData.filter(function(r){return r.tipo==='inad';});
+  var total = inad.reduce(function(s,r){return s+r.valor;},0);
+  var doc = new jsPDF();
+  doc.setFillColor(30,45,90); doc.rect(0,0,210,42,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(255,255,255);
+  doc.text('Relatorio Inadimplencia - CLIP Escola',14,18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(180,200,240);
+  doc.text('Grupo Jean Piaget | '+new Date().toLocaleDateString('pt-BR'),14,28);
+  doc.text('Total: '+fmtR(total)+' | '+inad.length+' alunos inadimplentes',14,36);
+  doc.autoTable({
+    startY:48,
+    head:[['Aluno','Responsavel','Turma','Vencimento','Dias','Valor','Escola']],
+    body:inad.sort(function(a,b){return (b.dias||0)-(a.dias||0);}).map(function(r){
+      return [r.aluno||'',r.resp||'',r.turma||'',r.venc,(r.dias||diasAtraso(r.venc))+'d',fmtR(r.valor),empNome(r.eid)];
+    }),
+    styles:{fontSize:8,cellPadding:3},
+    headStyles:{fillColor:[220,38,38],textColor:255,fontStyle:'bold'},
+    alternateRowStyles:{fillColor:[255,245,245]},
+    foot:[['','','','TOTAL','',fmtR(total),'']],
+    footStyles:{fillColor:[254,226,226],fontStyle:'bold',textColor:[220,38,38]},
+  });
+  doc.setFontSize(7); doc.setTextColor(150);
+  doc.text('Jean Piaget Sistema Financeiro',14,doc.internal.pageSize.height-6);
+  doc.save('CLIP_Inadimplencia.pdf');
+  notify('PDF exportado!','success');
+}
+
 
 // ══ INIT ═════════════════════════════════════════════
 (function(){
