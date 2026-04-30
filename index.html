@@ -320,6 +320,11 @@ tbody tr:hover td{background:var(--bg3)}
     <div class="sb-sec-clip">CLIP Escola</div>
     <div class="sb-item" onclick="nav('clip-import',this)"><span class="ic">⇪</span>Importar do CLIP</div>
     <div class="sb-item" onclick="nav('clip-alunos',this)"><span class="ic">◎</span>Alunos (CLIP)</div>
+    <div class="sb-sec-clip" style="background:#fef3c7;color:#92400e">Educbank</div>
+    <div class="sb-item" onclick="nav('educ-import',this)"><span class="ic">⇪</span>Importar Educbank</div>
+    <div class="sb-item" onclick="nav('educ-repasses',this)"><span class="ic">✓</span>Repasses</div>
+    <div class="sb-item" onclick="nav('educ-inad',this)"><span class="ic">⚠</span>Inad. Educbank</div>
+    <div class="sb-item" onclick="nav('educ-previsao',this)"><span class="ic">↗</span>Receita Garantida</div>
     <div class="sb-sec">Gestão</div>
     <div class="sb-item" onclick="nav('usuarios',this)"><span class="ic">◎</span>Usuários</div>
     <div class="sb-item" onclick="nav('config',this)"><span class="ic">⚙</span>Configurações</div>
@@ -530,6 +535,133 @@ tbody tr:hover td{background:var(--bg3)}
   </div>
 </div>
 
+
+
+<!-- EDUCBANK IMPORT -->
+<div class="section" id="sec-educ-import">
+  <div style="background:linear-gradient(135deg,#1e3a5f,#2a5298);border-radius:var(--rl);padding:20px 24px;margin-bottom:14px;display:flex;align-items:center;gap:16px">
+    <div style="width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0">EB</div>
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#fff">Educbank — Importar dados</div>
+      <div style="font-size:12px;color:#93c5fd;margin-top:2px">Importe repasses, inadimplentes e previsao de receita garantida</div>
+    </div>
+  </div>
+  <div class="alert al-i">
+    <div><strong>Como exportar do Educbank:</strong><br>
+    Repasses: Painel Educbank &gt; Financeiro &gt; Repasses &gt; Exportar CSV<br>
+    Inadimplentes: Painel Educbank &gt; Inadimplencia &gt; Exportar CSV<br>
+    Previsao: Painel Educbank &gt; Receita Garantida &gt; Exportar CSV</div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Repasses mensais</div><div class="card-sub">Valores recebidos da Educbank</div></div></div>
+      <div class="fg" style="margin-bottom:10px"><label>Escola</label><select id="educ-emp-r"></select></div>
+      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV</label>
+        <input type="file" id="educ-file-r" accept=".csv,.txt,.xlsx" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Ou cole o CSV</label>
+        <textarea id="educ-txt-r" placeholder="Competencia;DataRepasse;ValorBruto;Desconto;ValorLiquido;Status&#10;2025/01;2025-01-05;42000,00;2100,00;39900,00;Pago" style="min-height:80px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:11px;font-family:var(--font);width:100%"></textarea>
+      </div>
+      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importEducRepasses()">Importar repasses</button>
+      <div id="educ-msg-r" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Inadimplentes</div><div class="card-sub">Alunos em cobrança pelo Educbank</div></div></div>
+      <div class="fg" style="margin-bottom:10px"><label>Escola</label><select id="educ-emp-i"></select></div>
+      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV</label>
+        <input type="file" id="educ-file-i" accept=".csv,.txt,.xlsx" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Ou cole o CSV</label>
+        <textarea id="educ-txt-i" placeholder="Aluno;Responsavel;Vencimento;ValorOriginal;Status&#10;Joao Silva;Maria Silva;2025-03-10;850,00;Em cobranca" style="min-height:80px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:11px;font-family:var(--font);width:100%"></textarea>
+      </div>
+      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importEducInad()">Importar inadimplentes</button>
+      <div id="educ-msg-i" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Receita Garantida</div><div class="card-sub">Previsao de repasses futuros</div></div></div>
+      <div class="fg" style="margin-bottom:10px"><label>Escola</label><select id="educ-emp-p"></select></div>
+      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV</label>
+        <input type="file" id="educ-file-p" accept=".csv,.txt,.xlsx" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Ou cole o CSV</label>
+        <textarea id="educ-txt-p" placeholder="Competencia;DataPrevista;ValorGarantido;Alunos&#10;2025/07;2025-07-05;42000,00;98" style="min-height:80px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:11px;font-family:var(--font);width:100%"></textarea>
+      </div>
+      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importEducPrevisao()">Importar previsao</button>
+      <div id="educ-msg-p" style="margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Formatos aceitos — Educbank CSV</div></div>
+    <div style="font-size:12px;color:var(--text2);line-height:2">
+      Campos detectados automaticamente:<br>
+      <span class="tag">Competencia</span> <span class="tag">DataRepasse</span> <span class="tag">ValorBruto</span> <span class="tag">ValorLiquido</span> <span class="tag">Desconto</span> <span class="tag">Aluno</span> <span class="tag">Responsavel</span> <span class="tag">Status</span> <span class="tag">Alunos</span><br>
+      Separadores aceitos: ponto e virgula ou virgula | Datas: DD/MM/AAAA ou AAAA-MM-DD | Valores: 42.000,00 ou 42000.00
+    </div>
+  </div>
+</div>
+
+<!-- EDUCBANK REPASSES -->
+<div class="section" id="sec-educ-repasses">
+  <div class="card" style="padding:10px 14px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <select id="er-emp" class="tb-sel" onchange="renderEducRepasses()"><option value="todas">Todas as escolas</option></select>
+      <select id="er-status" class="tb-sel" onchange="renderEducRepasses()"><option value="">Todos</option><option value="pago">Pago</option><option value="previsto">Previsto</option></select>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="tb-btn" onclick="exportEducCSV('repasses')">CSV</button>
+        <button class="tb-btn primary" onclick="exportEducPDF('repasses')">PDF Repasses</button>
+        <button class="tb-btn" onclick="sincronizarEducRepasses()">Lancar no financeiro</button>
+      </div>
+    </div>
+  </div>
+  <div class="mgrid" id="er-metrics"></div>
+  <div class="card" style="padding:0"><div class="twrap"><table>
+    <thead><tr><th>Competencia</th><th>Data repasse</th><th>Valor bruto</th><th>Desconto/Taxa</th><th>Valor liquido</th><th>Escola</th><th>Status</th><th>No financeiro</th><th></th></tr></thead>
+    <tbody id="tb-educ-repasses"></tbody>
+  </table></div></div>
+</div>
+
+<!-- EDUCBANK INADIMPLENTES -->
+<div class="section" id="sec-educ-inad">
+  <div class="card" style="padding:10px 14px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input id="ei-q" placeholder="Buscar aluno..." oninput="renderEducInad()" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:7px 11px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:200px">
+      <select id="ei-emp" class="tb-sel" onchange="renderEducInad()"><option value="todas">Todas as escolas</option></select>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="tb-btn" onclick="exportEducCSV('inad')">CSV</button>
+        <button class="tb-btn primary" onclick="exportEducPDF('inad')">PDF Cobranca</button>
+      </div>
+    </div>
+  </div>
+  <div class="mgrid" id="ei-metrics"></div>
+  <div class="alert al-s" style="font-size:11px">Os alunos abaixo estao sob cobranca do Educbank. A escola nao precisa cobrar diretamente — o Educbank garante o repasse mesmo com inadimplencia.</div>
+  <div class="card" style="padding:0"><div class="twrap"><table>
+    <thead><tr><th>Aluno</th><th>Responsavel</th><th>Vencimento original</th><th>Valor original</th><th>Status Educbank</th><th>Escola</th><th></th></tr></thead>
+    <tbody id="tb-educ-inad"></tbody>
+  </table></div></div>
+</div>
+
+<!-- EDUCBANK RECEITA GARANTIDA -->
+<div class="section" id="sec-educ-previsao">
+  <div style="background:linear-gradient(135deg,#064e3b,#065f46);border-radius:var(--rl);padding:20px 24px;margin-bottom:14px">
+    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">Receita Garantida — Educbank</div>
+    <div style="font-size:12px;color:#6ee7b7">Previsao de repasses futuros garantidos pelo Educbank, independente da inadimplencia dos responsaveis.</div>
+  </div>
+  <div class="mgrid" id="ep-metrics"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr"><div><div class="card-title">Previsao de repasses</div><div class="card-sub">Receita garantida por mes</div></div></div>
+      <div id="ep-chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">Resumo por escola</div></div>
+      <div id="ep-escolas"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Calendario de repasses previstos</div><button class="tb-btn" onclick="lancarTodasPrevisoes()">Lancar todos no financeiro</button></div>
+    <div id="ep-cal"></div>
+  </div>
+</div>
 
 <!-- INADIMPLÊNCIA -->
 <div class="section" id="sec-inadimplencia">
@@ -745,7 +877,7 @@ let CAT_P=['Pessoal e Encargos','Aluguel e Ocupação','Material Pedagógico','A
 let CAT_R=['Mensalidades','Matrículas','Material Didático','Serviços Educacionais','Projetos Especiais','Subvenções','Outros'];
 let cfg={alerta:7,ir:0,regime:'simples'};
 let currentUser=null,currentEmpId=null;
-let empresas=[],allPagar=[],allReceber=[],orcamentos=[],concItems=[],clipData=[];
+let empresas=[],allPagar=[],allReceber=[],orcamentos=[],concItems=[],clipData=[],educData=[];
 let nextId=1000;
 
 // ══ EMPRESAS INICIAIS ════════════════════════════════
@@ -856,7 +988,7 @@ function seedDemo(){
 
 function salvar(){
   if(!currentUser)return;
-  try{localStorage.setItem('jp_d_'+currentUser.id,JSON.stringify({empresas,allPagar,allReceber,orcamentos,cfg,clipData}));}catch(e){}
+  try{localStorage.setItem('jp_d_'+currentUser.id,JSON.stringify({empresas,allPagar,allReceber,orcamentos,cfg,clipData,educData}));}catch(e){}
 }
 
 function carregarDados(){
@@ -865,10 +997,10 @@ function carregarDados(){
     if(d.empresas&&d.empresas.length){
       empresas=d.empresas;currentEmpId=empresas[0].id;
       allPagar=d.allPagar||[];allReceber=d.allReceber||[];
-      orcamentos=d.orcamentos||[];cfg={...cfg,...(d.cfg||{})};clipData=d.clipData||[];
+      orcamentos=d.orcamentos||[];cfg={...cfg,...(d.cfg||{})};clipData=d.clipData||[];educData=d.educData||[];
     } else {
       empresas=EMPS_INICIAIS.map(e=>({...e}));currentEmpId='emp1';
-      allPagar=[];allReceber=[];orcamentos=[];clipData=[];
+      allPagar=[];allReceber=[];orcamentos=[];clipData=[];educData=[];
     }
   }catch(e){empresas=EMPS_INICIAIS.map(e=>({...e}));currentEmpId='emp1';}
 }
@@ -895,7 +1027,7 @@ function trocarEmp(){currentEmpId=document.getElementById('emp-sel').value;refre
 function verConsolidado(){nav('consolidado',document.querySelector('.nitem'));}
 
 // ══ NAV ══════════════════════════════════════════════
-const PTITLES={dashboard:'Dashboard',inadimplencia:'Inadimplencia',previsao:'Previsao de Caixa',graficos:'Graficos Avancados','clip-import':'CLIP Escola - Importar','clip-alunos':'CLIP Escola - Alunos',cashflow:'Fluxo de Caixa',consolidado:'Visão Consolidada',pagar:'Contas a Pagar',receber:'Contas a Receber',cc:'Centro de Custo',dre:'DRE Completo','dre-simples':'DRE Simplificado',orcamento:'Orçamento vs Realizado',conciliacao:'Conciliação Bancária',usuarios:'Usuários e Permissões',config:'Configurações'};
+const PTITLES={dashboard:'Dashboard',inadimplencia:'Inadimplencia',previsao:'Previsao de Caixa',graficos:'Graficos Avancados','clip-import':'CLIP Escola - Importar','clip-alunos':'CLIP Escola - Alunos','educ-import':'Educbank - Importar','educ-repasses':'Educbank - Repasses','educ-inad':'Educbank - Inadimplentes','educ-previsao':'Educbank - Receita Garantida',cashflow:'Fluxo de Caixa',consolidado:'Visão Consolidada',pagar:'Contas a Pagar',receber:'Contas a Receber',cc:'Centro de Custo',dre:'DRE Completo','dre-simples':'DRE Simplificado',orcamento:'Orçamento vs Realizado',conciliacao:'Conciliação Bancária',usuarios:'Usuários e Permissões',config:'Configurações'};
 function nav(p,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
@@ -911,7 +1043,7 @@ function refresh(){
   if(m)renderPage(m[1]);
 }
 function renderPage(p){
-  const map={dashboard:renderDashboard,cashflow:renderCashflow,consolidado:renderConsolidado,pagar:renderPagar,receber:renderReceber,cc:renderCC,dre:renderDRE,'dre-simples':renderDRESimples,orcamento:renderOrcamento,conciliacao:()=>{},inadimplencia:renderInad,previsao:renderPrevisao,graficos:renderGraficos,'clip-import':renderClipImport,'clip-alunos':renderClipAlunos,usuarios:renderUsuarios,config:renderConfig};
+  const map={dashboard:renderDashboard,cashflow:renderCashflow,consolidado:renderConsolidado,pagar:renderPagar,receber:renderReceber,cc:renderCC,dre:renderDRE,'dre-simples':renderDRESimples,orcamento:renderOrcamento,conciliacao:()=>{},inadimplencia:renderInad,previsao:renderPrevisao,graficos:renderGraficos,'clip-import':renderClipImport,'clip-alunos':renderClipAlunos,'educ-import':renderEducImport,'educ-repasses':renderEducRepasses,'educ-inad':renderEducInad,'educ-previsao':renderEducPrevisao,usuarios:renderUsuarios,config:renderConfig};
   if(map[p])map[p]();
 }
 
@@ -2331,6 +2463,377 @@ function exportClipPDF() {
   doc.setFontSize(7); doc.setTextColor(150);
   doc.text('Jean Piaget Sistema Financeiro',14,doc.internal.pageSize.height-6);
   doc.save('CLIP_Inadimplencia.pdf');
+  notify('PDF exportado!','success');
+}
+
+
+// ── EDUCBANK ──────────────────────────────────────────────────
+
+function populateEducEmps() {
+  ['educ-emp-r','educ-emp-i','educ-emp-p','er-emp','ei-emp'].forEach(function(id) {
+    var s = document.getElementById(id); if (!s) return;
+    var hasAll = id === 'er-emp' || id === 'ei-emp';
+    s.innerHTML = (hasAll ? '<option value="todas">Todas as escolas</option>' : '') +
+      empresas.map(function(e) {
+        return '<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>';
+      }).join('');
+  });
+}
+
+function importEducRepasses() {
+  readFileOrTxt('educ-file-r','educ-txt-r', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+    var eid = (document.getElementById('educ-emp-r') && document.getElementById('educ-emp-r').value) || currentEmpId;
+    var add = 0, upd = 0;
+    rows.forEach(function(r) {
+      var comp      = detectCol(r, ['competencia','competência','comp','mes','month','periodo']);
+      var dataRep   = parseDataClip(detectCol(r, ['datarepasse','data_repasse','data','date','repasse']));
+      var valBruto  = parseValorClip(detectCol(r, ['valorbruto','valor_bruto','bruto','gross','total']));
+      var desconto  = parseValorClip(detectCol(r, ['desconto','taxa','fee','discount','deducao']));
+      var valLiq    = parseValorClip(detectCol(r, ['valorliquido','valor_liquido','liquido','net','liquido']));
+      var statusRaw = (detectCol(r, ['status','situacao','pago']) || '').toLowerCase();
+      var status    = (statusRaw.includes('pago') || statusRaw.includes('recebido') || statusRaw.includes('sim') || statusRaw.includes('credit')) ? 'pago' : 'previsto';
+      if (!valBruto && !valLiq) return;
+      if (!valLiq && valBruto) valLiq = valBruto - desconto;
+      if (!comp) comp = dataRep ? dataRep.slice(0,7) : today().slice(0,7);
+      var existe = educData.find(function(d) { return d.tipo==='repasse' && d.comp===comp && d.eid===eid; });
+      if (existe) { existe.valBruto=valBruto||existe.valBruto; existe.valLiq=valLiq||existe.valLiq; existe.status=status; upd++; }
+      else { educData.push({id:'er'+(nextId++),eid:eid,tipo:'repasse',comp:comp,dataRep:dataRep||today(),valBruto:valBruto,desconto:desconto,valLiq:valLiq,status:status}); add++; }
+    });
+    salvar();
+    document.getElementById('educ-msg-r').innerHTML = '<div class="alert al-s">'+add+' repasses importados, '+add+upd > 0 ? upd+' atualizados.' : '.'+'</div>';
+    notify(add+' repasses importados do Educbank','success');
+  });
+}
+
+function importEducInad() {
+  readFileOrTxt('educ-file-i','educ-txt-i', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+    var eid = (document.getElementById('educ-emp-i') && document.getElementById('educ-emp-i').value) || currentEmpId;
+    var add = 0, upd = 0;
+    rows.forEach(function(r) {
+      var aluno   = detectCol(r, ['aluno','nome','estudante','student','name']);
+      var resp    = detectCol(r, ['responsavel','responsible','resp','pai','mae']);
+      var venc    = parseDataClip(detectCol(r, ['vencimento','venc','data','due','prazo']));
+      var valor   = parseValorClip(detectCol(r, ['valororiginal','valor_original','valor','value','mensalidade']));
+      var stRaw   = (detectCol(r, ['status','situacao']) || 'em cobranca').toLowerCase();
+      if (!aluno && !valor) return;
+      var existe = educData.find(function(d) { return d.tipo==='inad' && d.aluno===aluno && d.venc===venc && d.eid===eid; });
+      if (existe) { existe.valor=valor||existe.valor; existe.status=stRaw; upd++; }
+      else { educData.push({id:'ei'+(nextId++),eid:eid,tipo:'inad',aluno:aluno||'Aluno',resp:resp||'Responsavel',venc:venc||today(),valor:valor,status:stRaw}); add++; }
+    });
+    salvar();
+    document.getElementById('educ-msg-i').innerHTML = '<div class="alert al-s">'+add+' inadimplentes importados.</div>';
+    notify(add+' inadimplentes importados do Educbank','success');
+  });
+}
+
+function importEducPrevisao() {
+  readFileOrTxt('educ-file-p','educ-txt-p', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+    var eid = (document.getElementById('educ-emp-p') && document.getElementById('educ-emp-p').value) || currentEmpId;
+    var add = 0, upd = 0;
+    rows.forEach(function(r) {
+      var comp      = detectCol(r, ['competencia','competência','comp','mes','periodo']);
+      var dataPrev  = parseDataClip(detectCol(r, ['dataprevista','data_prevista','datapagamento','data','date','previsao']));
+      var valor     = parseValorClip(detectCol(r, ['valorgarantido','valor_garantido','valor','garantido','value','receita']));
+      var alunos    = parseInt(detectCol(r, ['alunos','qtdalunos','quantidade','students','qtd']) || '0') || 0;
+      if (!valor) return;
+      if (!comp) comp = dataPrev ? dataPrev.slice(0,7) : today().slice(0,7);
+      var existe = educData.find(function(d) { return d.tipo==='previsao' && d.comp===comp && d.eid===eid; });
+      if (existe) { existe.valor=valor; existe.alunos=alunos; upd++; }
+      else { educData.push({id:'ep'+(nextId++),eid:eid,tipo:'previsao',comp:comp,dataPrev:dataPrev||today(),valor:valor,alunos:alunos,lancado:false}); add++; }
+    });
+    salvar();
+    document.getElementById('educ-msg-p').innerHTML = '<div class="alert al-s">'+add+' previsoes importadas.</div>';
+    notify(add+' previsoes importadas do Educbank','success');
+  });
+}
+
+function renderEducImport() {
+  populateEducEmps();
+}
+
+function renderEducRepasses() {
+  populateEducEmps();
+  var empF   = (document.getElementById('er-emp') && document.getElementById('er-emp').value) || 'todas';
+  var stF    = (document.getElementById('er-status') && document.getElementById('er-status').value) || '';
+  var d = educData.filter(function(r) {
+    if (r.tipo !== 'repasse') return false;
+    if (empF !== 'todas' && r.eid !== empF) return false;
+    if (stF && r.status !== stF) return false;
+    return true;
+  }).sort(function(a,b) { return b.comp.localeCompare(a.comp); });
+
+  var totBruto = d.reduce(function(s,r){return s+r.valBruto;},0);
+  var totLiq   = d.reduce(function(s,r){return s+r.valLiq;},0);
+  var totDesc  = d.reduce(function(s,r){return s+r.desconto;},0);
+  var pagos    = d.filter(function(r){return r.status==='pago';});
+  var totPago  = pagos.reduce(function(s,r){return s+r.valLiq;},0);
+
+  document.getElementById('er-metrics').innerHTML = [
+    {l:'Total bruto Educbank',  v:fmtR(totBruto), c:'mg'},
+    {l:'Total liquido recebido',v:fmtR(totLiq),   c:'mg'},
+    {l:'Descontos/Taxas',       v:fmtR(totDesc),  c:'mr'},
+    {l:'Repasses pagos',        v:pagos.length,   c:'mb'},
+  ].map(function(m){return '<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>';}).join('');
+
+  var tb = document.getElementById('tb-educ-repasses');
+  if (!d.length) {
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="ei">EB</div><p>Nenhum repasse importado.<br>Va em Importar Educbank para carregar os dados.</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = d.map(function(r) {
+    var emp = empresas.find(function(e){return e.id===r.eid;});
+    var noFin = allReceber.some(function(x){return x.obs && x.obs.indexOf('Educbank')>=0 && x.obs.indexOf(r.comp)>=0 && x.eid===r.eid;});
+    var stBadge = r.status==='pago' ? '<span class="badge bg">Pago</span>' : '<span class="badge ba">Previsto</span>';
+    return '<tr>'
+      + '<td class="mono fw7">'+r.comp+'</td>'
+      + '<td class="mono" style="font-size:11px">'+r.dataRep+'</td>'
+      + '<td class="mono tg">'+fmtR(r.valBruto)+'</td>'
+      + '<td class="mono tr">'+fmtR(r.desconto)+'</td>'
+      + '<td class="mono tg fw7">'+fmtR(r.valLiq)+'</td>'
+      + '<td>'+(emp?'<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+emp.cor+'"></span>'+emp.nome.split(' ').slice(0,2).join(' ')+'</span>':'—')+'</td>'
+      + '<td>'+stBadge+'</td>'
+      + '<td>'+(noFin?'<span class="badge bg">Sim</span>':'<span class="badge ba">Nao</span>')+'</td>'
+      + '<td><div style="display:flex;gap:3px">'
+          + (!noFin ? '<button class="tb-btn sm" onclick="lancarRepasseFin(\''+r.id+'\')">Lancar</button>' : '')
+          + '<button class="tb-btn sm danger" onclick="delEduc(\''+r.id+'\')">X</button>'
+        + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function lancarRepasseFin(id) {
+  var r = educData.find(function(x){return x.id===id;});
+  if (!r) return;
+  var emp = empresas.find(function(e){return e.id===r.eid;});
+  var obj = {
+    id: 'r'+(nextId++), eid: r.eid,
+    desc: 'Repasse Educbank — '+r.comp,
+    cli: 'Educbank',
+    venc: r.dataRep, valor: r.valLiq,
+    cc: 'Financeiro', cat: 'Mensalidades',
+    status: r.status==='pago'?'recebido':'pendente',
+    nf: '', obs: 'Educbank repasse '+r.comp, conciliado: false, parc: '1/1'
+  };
+  allReceber.push(obj);
+  salvar(); renderEducRepasses();
+  notify('Repasse de '+fmtR(r.valLiq)+' lancado no financeiro!','success');
+}
+
+function sincronizarEducRepasses() {
+  var naoSinc = educData.filter(function(r) {
+    if (r.tipo !== 'repasse') return false;
+    return !allReceber.some(function(x){return x.obs && x.obs.indexOf('Educbank')>=0 && x.obs.indexOf(r.comp)>=0 && x.eid===r.eid;});
+  });
+  if (!naoSinc.length) { notify('Todos os repasses ja estao no financeiro!','success'); return; }
+  naoSinc.forEach(function(r){ lancarRepasseFin(r.id); });
+  notify(naoSinc.length+' repasses lancados no financeiro!','success');
+}
+
+function renderEducInad() {
+  populateEducEmps();
+  var q    = ((document.getElementById('ei-q') && document.getElementById('ei-q').value) || '').toLowerCase();
+  var empF = (document.getElementById('ei-emp') && document.getElementById('ei-emp').value) || 'todas';
+  var d = educData.filter(function(r) {
+    if (r.tipo !== 'inad') return false;
+    if (empF !== 'todas' && r.eid !== empF) return false;
+    if (q && !(r.aluno||'').toLowerCase().includes(q) && !(r.resp||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  var total = d.reduce(function(s,r){return s+r.valor;},0);
+  document.getElementById('ei-metrics').innerHTML = [
+    {l:'Total em cobranca Educbank', v:fmtR(total),  c:'ma'},
+    {l:'Alunos inadimplentes',       v:d.length,     c:'mr'},
+    {l:'Repasse garantido mesmo assim', v:'Sim',      c:'mg'},
+    {l:'Gestao Educbank',            v:'Ativa',       c:'mb'},
+  ].map(function(m){return '<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>';}).join('');
+
+  var tb = document.getElementById('tb-educ-inad');
+  if (!d.length) {
+    tb.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="ei">EB</div><p>Nenhum inadimplente importado do Educbank.</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = d.map(function(r) {
+    var emp = empresas.find(function(e){return e.id===r.eid;});
+    var stCls = (r.status||'').includes('pago')?'bg':'ba';
+    return '<tr>'
+      + '<td><div style="font-size:12px;font-weight:600">'+(r.aluno||'—')+'</div></td>'
+      + '<td class="muted">'+(r.resp||'—')+'</td>'
+      + '<td class="mono" style="font-size:11px">'+(r.venc||'—')+'</td>'
+      + '<td class="mono tr fw7">'+fmtR(r.valor)+'</td>'
+      + '<td><span class="badge '+stCls+'">'+(r.status||'Em cobranca')+'</span></td>'
+      + '<td>'+(emp?'<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+emp.cor+'"></span>'+emp.nome.split(' ').slice(0,2).join(' ')+'</span>':'—')+'</td>'
+      + '<td><button class="tb-btn sm danger" onclick="delEduc(\''+r.id+'\')">X</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function renderEducPrevisao() {
+  var d = educData.filter(function(r){return r.tipo==='previsao';})
+    .sort(function(a,b){return a.comp.localeCompare(b.comp);});
+
+  var totalPrev = d.reduce(function(s,r){return s+r.valor;},0);
+  var totalAlunos = d.reduce(function(s,r){return s+(r.alunos||0);},0);
+  var lancados = d.filter(function(r){return r.lancado;});
+
+  document.getElementById('ep-metrics').innerHTML = [
+    {l:'Total receita garantida', v:fmtR(totalPrev),  c:'mg'},
+    {l:'Total de alunos',         v:totalAlunos||'—', c:'mb'},
+    {l:'Meses previstos',         v:d.length,         c:'ma'},
+    {l:'Lancados no financeiro',  v:lancados.length,  c:'mg'},
+  ].map(function(m){return '<div class="metric '+m.c+'"><div class="m-lbl">'+m.l+'</div><div class="m-val">'+m.v+'</div></div>';}).join('');
+
+  // Grafico de barras por mes
+  var maxV = Math.max.apply(null, d.map(function(x){return x.valor;}).concat([1]));
+  var H = 120;
+  document.getElementById('ep-chart').innerHTML = d.length ? (
+    '<div style="display:flex;align-items:flex-end;gap:6px;height:'+(H+24)+'px;padding-bottom:24px">'
+    + d.map(function(x) {
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:40px">'
+          + '<div style="width:100%;background:'+(x.lancado?'rgba(22,163,74,0.8)':'rgba(22,163,74,0.35)')+';border-radius:3px 3px 0 0;height:'+Math.round(x.valor/maxV*H)+'px;min-height:3px" title="'+x.comp+': '+fmtR(x.valor)+'"></div>'
+          + '<div style="font-size:9px;color:var(--text2)">'+x.comp.slice(5,7)+'/'+x.comp.slice(2,4)+'</div>'
+          + '<div style="font-size:8px;color:var(--text3)">'+(x.alunos?x.alunos+'al.':'')+'</div>'
+        + '</div>';
+      }).join('')
+    + '</div>'
+    + '<div style="font-size:11px;color:var(--text2);margin-top:4px">Valores em verde escuro = ja lancados no financeiro</div>'
+  ) : '<div class="empty"><p>Importe previsoes do Educbank</p></div>';
+
+  // Resumo por escola
+  var porEsc = {};
+  empresas.forEach(function(e){ porEsc[e.id]={nome:e.nome,cor:e.cor,total:0,meses:0}; });
+  d.forEach(function(r){ if(porEsc[r.eid]){porEsc[r.eid].total+=r.valor;porEsc[r.eid].meses++;} });
+  var maxEsc = Math.max.apply(null, Object.values(porEsc).map(function(e){return e.total;}).concat([1]));
+  document.getElementById('ep-escolas').innerHTML = Object.values(porEsc).filter(function(e){return e.total>0;}).map(function(e){
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'
+        + '<span style="font-size:12px;font-weight:600">'+e.nome.split(' ').slice(0,3).join(' ')+'</span>'
+        + '<span class="mono tg fw7">'+fmtR(e.total)+'</span>'
+      + '</div>'
+      + '<div class="prow"><div class="plbl muted">'+e.meses+' meses</div><div class="pbg"><div class="pfill" style="width:'+Math.round(e.total/maxEsc*100)+'%;background:'+e.cor+'"></div></div><div class="pval mono">'+fmtR(e.total/Math.max(e.meses,1))+'/mes</div></div>'
+    + '</div>';
+  }).join('') || '<div class="empty"><p>Importe previsoes do Educbank</p></div>';
+
+  // Calendario
+  document.getElementById('ep-cal').innerHTML = d.length ? d.map(function(r) {
+    var emp = empresas.find(function(e){return e.id===r.eid;});
+    return '<div class="cfrow">'
+      + '<div class="cfdot d-in"></div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:12px;font-weight:600">Repasse '+(emp?emp.nome.split(' ').slice(0,2).join(' '):'—')+' — '+r.comp+'</div>'
+        + '<div style="font-size:10px;color:var(--text3)">Previsao: '+r.dataPrev+(r.alunos?' | '+r.alunos+' alunos':'')+'</div>'
+      + '</div>'
+      + '<div class="mono tg fw7" style="font-size:13px">'+fmtR(r.valor)+'</div>'
+      + '<div style="margin-left:8px">'+(r.lancado?'<span class="badge bg">Lancado</span>':'<button class="tb-btn sm" onclick="lancarPrevisaoFin(\''+r.id+'\')">Lancar</button>')+'</div>'
+    + '</div>';
+  }).join('') : '<div class="empty"><p>Nenhuma previsao importada do Educbank</p></div>';
+}
+
+function lancarPrevisaoFin(id) {
+  var r = educData.find(function(x){return x.id===id;});
+  if (!r) return;
+  var obj = {
+    id: 'r'+(nextId++), eid: r.eid,
+    desc: 'Receita Garantida Educbank — '+r.comp,
+    cli: 'Educbank',
+    venc: r.dataPrev, valor: r.valor,
+    cc: 'Financeiro', cat: 'Mensalidades',
+    status: 'pendente',
+    nf: '', obs: 'Educbank garantido '+r.comp, conciliado: false, parc: '1/1'
+  };
+  allReceber.push(obj);
+  r.lancado = true;
+  salvar(); renderEducPrevisao();
+  notify('Receita garantida de '+fmtR(r.valor)+' lancada no financeiro!','success');
+}
+
+function lancarTodasPrevisoes() {
+  var naoLanc = educData.filter(function(r){return r.tipo==='previsao'&&!r.lancado;});
+  if (!naoLanc.length) { notify('Todas as previsoes ja estao lancadas!','success'); return; }
+  naoLanc.forEach(function(r){ lancarPrevisaoFin(r.id); });
+  notify(naoLanc.length+' previsoes lancadas no financeiro!','success');
+}
+
+function delEduc(id) {
+  educData = educData.filter(function(x){return x.id!==id;});
+  salvar();
+  var page = document.querySelector('.sb-item.active');
+  if (page) {
+    var m = page.getAttribute('onclick') && page.getAttribute('onclick').match(/'([^']+)'/);
+    if (m) renderPage(m[1]);
+  }
+  notify('Registro removido','warning');
+}
+
+function exportEducCSV(tipo) {
+  var d = educData.filter(function(r){return r.tipo===tipo||(tipo==='repasses'&&r.tipo==='repasse');});
+  var rows, fname;
+  if (tipo === 'repasses' || tipo === 'repasse') {
+    rows = [['Competencia','DataRepasse','ValorBruto','Desconto','ValorLiquido','Escola','Status']];
+    d.forEach(function(r){rows.push([r.comp,r.dataRep,r.valBruto,r.desconto,r.valLiq,empNome(r.eid),r.status]);});
+    fname = 'educbank_repasses.csv';
+  } else {
+    rows = [['Aluno','Responsavel','Vencimento','Valor','Status','Escola']];
+    d.forEach(function(r){rows.push([r.aluno||'',r.resp||'',r.venc||'',r.valor,r.status||'',empNome(r.eid)]);});
+    fname = 'educbank_inadimplentes.csv';
+  }
+  var csv = rows.map(function(r){return r.map(function(v){return '"'+(String(v||'').replace(/"/g,'""'))+'"';}).join(';');}).join('\n');
+  dlFile('\uFEFF'+csv,'text/csv',fname);
+  notify('CSV exportado','success');
+}
+
+function exportEducPDF(tipo) {
+  var jsPDF = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPDF) { notify('PDF nao disponivel','error'); return; }
+  var doc = new jsPDF();
+  doc.setFillColor(30,45,90); doc.rect(0,0,210,42,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(255,255,255);
+
+  if (tipo === 'repasses') {
+    var d = educData.filter(function(r){return r.tipo==='repasse';});
+    var total = d.reduce(function(s,r){return s+r.valLiq;},0);
+    doc.text('Educbank — Repasses Mensais',14,18);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(180,200,240);
+    doc.text('Grupo Jean Piaget | '+new Date().toLocaleDateString('pt-BR'),14,28);
+    doc.text('Total liquido recebido: '+fmtR(total),14,36);
+    doc.autoTable({
+      startY:48,
+      head:[['Competencia','Data Repasse','Valor Bruto','Desconto','Valor Liquido','Escola','Status']],
+      body:d.map(function(r){return [r.comp,r.dataRep,fmtR(r.valBruto),fmtR(r.desconto),fmtR(r.valLiq),empNome(r.eid),r.status==='pago'?'Pago':'Previsto'];}),
+      styles:{fontSize:8,cellPadding:3},
+      headStyles:{fillColor:[5,150,105],textColor:255,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[240,253,244]},
+      foot:[['','','','TOTAL',fmtR(total),'','']],
+      footStyles:{fillColor:[209,250,229],fontStyle:'bold',textColor:[5,150,105]},
+    });
+    doc.save('Educbank_Repasses.pdf');
+  } else {
+    var d2 = educData.filter(function(r){return r.tipo==='inad';});
+    var total2 = d2.reduce(function(s,r){return s+r.valor;},0);
+    doc.text('Educbank — Inadimplentes em Cobranca',14,18);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(180,200,240);
+    doc.text('Grupo Jean Piaget | '+new Date().toLocaleDateString('pt-BR'),14,28);
+    doc.text('Total em cobranca: '+fmtR(total2)+' | Educbank garante o repasse!',14,36);
+    doc.autoTable({
+      startY:48,
+      head:[['Aluno','Responsavel','Vencimento','Valor Original','Status','Escola']],
+      body:d2.map(function(r){return [r.aluno||'',r.resp||'',r.venc||'',fmtR(r.valor),r.status||'Em cobranca',empNome(r.eid)];}),
+      styles:{fontSize:8,cellPadding:3},
+      headStyles:{fillColor:[217,119,6],textColor:255,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[255,251,235]},
+      foot:[['','','TOTAL',fmtR(total2),'','']],
+      footStyles:{fillColor:[254,243,199],fontStyle:'bold',textColor:[146,64,14]},
+    });
+    doc.save('Educbank_Inadimplentes.pdf');
+  }
+  doc.setFontSize(7); doc.setTextColor(150);
+  doc.text('Jean Piaget Sistema Financeiro',14,doc.internal.pageSize.height-6);
   notify('PDF exportado!','success');
 }
 
