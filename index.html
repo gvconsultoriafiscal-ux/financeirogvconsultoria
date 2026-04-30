@@ -724,14 +724,28 @@ tbody tr:hover td{background:var(--bg3)}
   <div class="g2">
     <div class="card">
       <div class="card-hdr"><div><div class="card-title">Importar mensalidades</div><div class="card-sub">Geradas como contas a receber</div></div></div>
-      <div class="fg" style="margin-bottom:10px"><label>Escola de destino</label><select id="clip-emp-m"></select></div>
-      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV do CLIP</label>
+      <div class="alert al-i" style="font-size:11px;margin-bottom:10px">
+        O sistema detecta automaticamente a coluna <strong>Escola/Unidade</strong> do CSV e distribui cada aluno para a escola correta. Se nao encontrar, usa a escola selecionada abaixo.
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Escola padrao (se nao identificada no CSV)</label><select id="clip-emp-m"></select></div>
+      <div class="fg" style="margin-bottom:6px"><label>Mapeamento de escolas no CSV</label></div>
+      <div style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:10px;font-size:11px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="clip-map-container">
+          <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600">TEXTO NO CSV</div><input id="clip-map-txt-1" placeholder="Ex: Bercario, Escola 1, JP1" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></div>
+          <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600">ESCOLA NO SISTEMA</div><select id="clip-map-emp-1" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></select></div>
+          <div><input id="clip-map-txt-2" placeholder="Ex: NEI, Escola 2, JP2" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></div>
+          <div><select id="clip-map-emp-2" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></select></div>
+          <div><input id="clip-map-txt-3" placeholder="Ex: Colegio, Escola 3, JP3" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></div>
+          <div><select id="clip-map-emp-3" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></select></div>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Arquivo CSV do CLIP (todas as escolas juntas)</label>
         <input type="file" id="clip-file-m" accept=".csv,.txt" style="background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;width:100%">
       </div>
       <div class="fg" style="margin-bottom:12px"><label>Ou cole o conteudo CSV</label>
-        <textarea id="clip-txt-m" placeholder="Aluno;Responsavel;Vencimento;Valor;Status" style="min-height:100px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:100%"></textarea>
+        <textarea id="clip-txt-m" placeholder="Aluno;Escola;Turma;Responsavel;Vencimento;Valor;Status&#10;Joao Silva;Bercario;Turma A;Maria Silva;2025-06-10;850,00;Em aberto&#10;Ana Costa;NEI;Turma B;Jose Costa;2025-06-10;920,00;Pago" style="min-height:100px;resize:vertical;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);padding:8px;border-radius:var(--r);font-size:12px;font-family:var(--font);width:100%"></textarea>
       </div>
-      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importarClipMens()">Importar mensalidades</button>
+      <button class="tb-btn primary" style="width:100%;justify-content:center" onclick="importarClipMens()">Importar e distribuir por escola</button>
       <div id="clip-msg-m" style="margin-top:8px"></div>
     </div>
     <div class="card">
@@ -2275,7 +2289,195 @@ function renderGraficos() {
     + '</div>';
 }
 
-// ── CLIP ESCOLA ───────────────────────────────────────────────
+// ── CLIP ESCOLA — MAPEAMENTO DE ESCOLAS ──────────────────────
+
+function populateClipMapEmps() {
+  // Popula todos os selects de mapeamento
+  ['clip-emp-m','clip-emp-i','clip-map-emp-1','clip-map-emp-2','clip-map-emp-3'].forEach(function(id) {
+    var s = document.getElementById(id); if (!s) return;
+    s.innerHTML = '<option value="">-- Selecione --</option>' +
+      empresas.map(function(e) {
+        return '<option value="'+e.id+'"'+(e.id===currentEmpId?' selected':'')+'>'+e.nome+'</option>';
+      }).join('');
+  });
+}
+
+function getClipMapeamento() {
+  // Retorna o mapeamento configurado pelo usuário
+  var mapa = [];
+  for (var i = 1; i <= 3; i++) {
+    var txt = (document.getElementById('clip-map-txt-'+i) && document.getElementById('clip-map-txt-'+i).value || '').trim().toLowerCase();
+    var emp = document.getElementById('clip-map-emp-'+i) && document.getElementById('clip-map-emp-'+i).value || '';
+    if (txt && emp) {
+      // aceita multiplos textos separados por virgula
+      txt.split(',').forEach(function(t) {
+        var t2 = t.trim();
+        if (t2) mapa.push({texto: t2, eid: emp});
+      });
+    }
+  }
+  return mapa;
+}
+
+function detectarEscolaDoCsv(row, mapa, empPadrao) {
+  // Tenta encontrar a escola pela coluna escola/unidade do CSV
+  var colEscola = detectCol(row, ['escola','unidade','unit','school','filial','campus','colegio','berçario','bercario','nei']);
+  if (!colEscola) {
+    // tenta pela turma
+    colEscola = detectCol(row, ['turma','classe','class','grupo','group']);
+  }
+  if (!colEscola) return empPadrao;
+
+  var valLower = colEscola.toLowerCase();
+
+  // Primeiro tenta o mapeamento configurado pelo usuário
+  for (var i = 0; i < mapa.length; i++) {
+    if (valLower.includes(mapa[i].texto)) return mapa[i].eid;
+  }
+
+  // Fallback: tenta match automático com nome das empresas
+  for (var j = 0; j < empresas.length; j++) {
+    var nomeParts = empresas[j].nome.toLowerCase().split(' ');
+    for (var k = 0; k < nomeParts.length; k++) {
+      if (nomeParts[k].length > 3 && valLower.includes(nomeParts[k])) {
+        return empresas[j].id;
+      }
+    }
+  }
+
+  return empPadrao;
+}
+
+// ── OVERRIDE: importarClipMens com mapeamento ─────────────────
+function importarClipMens() {
+  readFileOrTxt('clip-file-m','clip-txt-m', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+
+    var empPadrao = (document.getElementById('clip-emp-m') && document.getElementById('clip-emp-m').value) || currentEmpId;
+    var mapa = getClipMapeamento();
+
+    var contadores = {}; // { eid: { add, upd } }
+    empresas.forEach(function(e) { contadores[e.id] = {add:0, upd:0}; });
+
+    rows.forEach(function(r) {
+      var aluno   = detectCol(r, ['aluno','nome','estudante','student','name']);
+      var resp    = detectCol(r, ['responsavel','responsible','resp','pai','mae']);
+      var venc    = parseDataClip(detectCol(r, ['vencimento','venc','data','due','prazo','date']));
+      var valor   = parseValorClip(detectCol(r, ['valor','value','mensalidade','amount','preco']));
+      var stRaw   = (detectCol(r, ['status','situacao','pago','pagamento']) || '').toLowerCase();
+      var status  = (stRaw.includes('pago')||stRaw.includes('recebido')||stRaw.includes('quitado')||stRaw.includes('sim')||stRaw.includes('credit')) ? 'recebido' : 'pendente';
+      var turma   = detectCol(r, ['turma','classe','serie','class','grupo']);
+
+      if (!aluno && !valor) return;
+
+      // Detecta a escola automaticamente
+      var eid = detectarEscolaDoCsv(r, mapa, empPadrao);
+
+      var existe = clipData.find(function(m) {
+        return m.tipo==='mens' && m.aluno===aluno && m.venc===venc && m.eid===eid;
+      });
+
+      if (existe) {
+        existe.status = status;
+        existe.valor  = valor || existe.valor;
+        contadores[eid].upd++;
+      } else {
+        clipData.push({
+          id: 'cm'+(nextId++), eid: eid, tipo: 'mens',
+          aluno: aluno||'Aluno', resp: resp||'Responsavel',
+          turma: turma||'—', venc: venc, valor: valor, status: status
+        });
+        contadores[eid].add++;
+      }
+    });
+
+    salvar();
+
+    // Monta mensagem detalhada por escola
+    var linhas = [];
+    empresas.forEach(function(e) {
+      var c = contadores[e.id];
+      if (c.add || c.upd) {
+        linhas.push('<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+e.cor+'"></span><strong>'+e.nome.split(' ').slice(0,3).join(' ')+':</strong> '+c.add+' importados'+(c.upd?' / '+c.upd+' atualizados':'')+'</span>');
+      }
+    });
+
+    var totalAdd = empresas.reduce(function(s,e){return s+contadores[e.id].add;},0);
+    var totalUpd = empresas.reduce(function(s,e){return s+contadores[e.id].upd;},0);
+
+    document.getElementById('clip-msg-m').innerHTML =
+      '<div class="alert al-s" style="flex-direction:column;align-items:flex-start;gap:6px">'
+      + '<strong>'+totalAdd+' mensalidades importadas, '+totalUpd+' atualizadas</strong>'
+      + linhas.map(function(l){return '<div>'+l+'</div>';}).join('')
+      + (mapa.length===0?'<div style="font-size:10px;color:var(--amber)">Dica: configure o mapeamento de escolas acima para melhor distribuicao automatica.</div>':'')
+      + '</div>';
+
+    notify(totalAdd+' mensalidades distribuidas entre '+empresas.length+' escolas','success');
+  });
+}
+
+// ── IMPORTAR INADIMPLENTES COM MAPEAMENTO ─────────────────────
+function importarClipInad() {
+  readFileOrTxt('clip-file-i','clip-txt-i', function(txt) {
+    var rows = parseCSVclip(txt);
+    if (!rows.length) { notify('Nenhum dado encontrado','error'); return; }
+
+    var empPadrao = (document.getElementById('clip-emp-i') && document.getElementById('clip-emp-i').value) || currentEmpId;
+    var mapa = getClipMapeamento();
+    var add = 0, upd = 0;
+
+    rows.forEach(function(r) {
+      var aluno  = detectCol(r, ['aluno','nome','estudante']);
+      var resp   = detectCol(r, ['responsavel','responsible','resp','pai','mae']);
+      var venc   = parseDataClip(detectCol(r, ['vencimento','venc','data','due']));
+      var valor  = parseValorClip(detectCol(r, ['valor','value','mensalidade','amount']));
+      var dias   = parseInt(detectCol(r, ['dias','atraso','days'])||'0') || diasAtraso(venc);
+      var turma  = detectCol(r, ['turma','classe','serie','class']);
+
+      if (!aluno && !valor) return;
+
+      var eid = detectarEscolaDoCsv(r, mapa, empPadrao);
+
+      var existe = clipData.find(function(m) {
+        return m.tipo==='inad' && m.aluno===aluno && m.venc===venc && m.eid===eid;
+      });
+      if (existe) { existe.valor=valor||existe.valor; existe.dias=dias; upd++; }
+      else { clipData.push({id:'ci'+(nextId++),eid:eid,tipo:'inad',aluno:aluno||'Aluno',resp:resp||'Responsavel',turma:turma||'—',venc:venc,valor:valor,dias:dias}); add++; }
+    });
+
+    salvar();
+    document.getElementById('clip-msg-i').innerHTML = '<div class="alert al-s">'+add+' inadimplentes importados, '+upd+' atualizados — distribuidos automaticamente por escola.</div>';
+    notify(add+' inadimplentes importados','success');
+  });
+}
+
+// ── RENDER CLIP IMPORT: popula mapa de escolas ────────────────
+function renderClipImport() {
+  populateClipMapEmps();
+  // Pre-preenche o mapeamento com os nomes das empresas cadastradas
+  var hints = [
+    ['Bercario','Ber','JP1','Escola 1'],
+    ['NEI','Espaco','JP2','Escola 2'],
+    ['Colegio','Vila Re','JP3','Escola 3']
+  ];
+  empresas.forEach(function(e, i) {
+    var inp = document.getElementById('clip-map-txt-'+(i+1));
+    var sel = document.getElementById('clip-map-emp-'+(i+1));
+    if (inp && !inp.value) {
+      // sugere baseado no nome da empresa
+      var nome = e.nome.toLowerCase();
+      if (nome.includes('ber')) inp.placeholder = 'Bercario, Ber, JP1';
+      else if (nome.includes('nei') || nome.includes('espaco')) inp.placeholder = 'NEI, Espaco, JP2';
+      else if (nome.includes('col') || nome.includes('vila')) inp.placeholder = 'Colegio, Vila Re, JP3';
+    }
+    if (sel) sel.value = e.id;
+  });
+}
+
+
+
+// ── CLIP ESCOLA UTILS ───────────────────────────────────────────────
 function renderClipImport() {
   ['clip-emp-m','clip-emp-i'].forEach(function(id){
     var s = document.getElementById(id); if(!s) return;
