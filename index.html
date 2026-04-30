@@ -729,6 +729,7 @@ tbody tr:hover td{background:var(--bg3)}
       </div>
       <div class="fg" style="margin-bottom:10px"><label>Escola padrao (se nao identificada no CSV)</label><select id="clip-emp-m"></select></div>
       <div class="fg" style="margin-bottom:6px"><label>Mapeamento de escolas no CSV</label></div>
+      <div id="clip-regra-info" style="margin-bottom:8px"></div>
       <div style="background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:10px;font-size:11px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="clip-map-container">
           <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600">TEXTO NO CSV</div><input id="clip-map-txt-1" placeholder="Ex: Bercario, Escola 1, JP1" style="background:var(--bg2);border:1.5px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:11px;font-family:var(--font);width:100%"></div>
@@ -2320,27 +2321,50 @@ function getClipMapeamento() {
 }
 
 function detectarEscolaDoCsv(row, mapa, empPadrao) {
-  // Tenta encontrar a escola pela coluna escola/unidade do CSV
-  var colEscola = detectCol(row, ['escola','unidade','unit','school','filial','campus','colegio','berçario','bercario','nei']);
-  if (!colEscola) {
-    // tenta pela turma
-    colEscola = detectCol(row, ['turma','classe','class','grupo','group']);
+  // Coluna Unidade/Turma do CSV do CLIP Escola
+  var colUnidade = detectCol(row, ['unidade','escola','unit','school','filial','campus']);
+  var colTurma   = detectCol(row, ['turma','classe','class','grupo','group','serie']);
+  var valCheck   = (colUnidade || colTurma || '').trim().toUpperCase();
+
+  // ── REGRA FIXA JEAN PIAGET ─────────────────────────────────
+  // BI, BII, BIII = Escola 1 (J.P. Berçário)
+  // Qualquer outra turma = Escola 2 (NEI Espaço Jean Piaget)
+  // Escola 3 (Colégio Vila Ré) vem pelo Educbank — não entra aqui
+  if (valCheck) {
+    var isBercario = /^B(I{1,3})$/.test(valCheck) ||   // BI, BII, BIII exato
+                    valCheck === 'BI'  ||
+                    valCheck === 'BII' ||
+                    valCheck === 'BIII';
+
+    // Busca Escola 1 e Escola 2 nas empresas cadastradas
+    var escola1 = empresas.find(function(e) {
+      return e.nome.toLowerCase().includes('ber') || e.nome.toLowerCase().includes('ber');
+    });
+    var escola2 = empresas.find(function(e) {
+      return e.nome.toLowerCase().includes('nei') || e.nome.toLowerCase().includes('espa');
+    });
+
+    if (isBercario && escola1) return escola1.id;
+    if (!isBercario && escola2) return escola2.id;
   }
-  if (!colEscola) return empPadrao;
 
-  var valLower = colEscola.toLowerCase();
-
-  // Primeiro tenta o mapeamento configurado pelo usuário
-  for (var i = 0; i < mapa.length; i++) {
-    if (valLower.includes(mapa[i].texto)) return mapa[i].eid;
+  // ── MAPEAMENTO MANUAL (configurado pelo usuário) ───────────
+  if (mapa && mapa.length) {
+    var valLower = (colUnidade || colTurma || '').toLowerCase();
+    for (var i = 0; i < mapa.length; i++) {
+      if (valLower.includes(mapa[i].texto)) return mapa[i].eid;
+    }
   }
 
-  // Fallback: tenta match automático com nome das empresas
-  for (var j = 0; j < empresas.length; j++) {
-    var nomeParts = empresas[j].nome.toLowerCase().split(' ');
-    for (var k = 0; k < nomeParts.length; k++) {
-      if (nomeParts[k].length > 3 && valLower.includes(nomeParts[k])) {
-        return empresas[j].id;
+  // ── FALLBACK: match com nome das empresas ──────────────────
+  var valLower2 = (colUnidade || colTurma || '').toLowerCase();
+  if (valLower2) {
+    for (var j = 0; j < empresas.length; j++) {
+      var nomeParts = empresas[j].nome.toLowerCase().split(' ');
+      for (var k = 0; k < nomeParts.length; k++) {
+        if (nomeParts[k].length > 3 && valLower2.includes(nomeParts[k])) {
+          return empresas[j].id;
+        }
       }
     }
   }
@@ -2455,24 +2479,29 @@ function importarClipInad() {
 // ── RENDER CLIP IMPORT: popula mapa de escolas ────────────────
 function renderClipImport() {
   populateClipMapEmps();
-  // Pre-preenche o mapeamento com os nomes das empresas cadastradas
-  var hints = [
-    ['Bercario','Ber','JP1','Escola 1'],
-    ['NEI','Espaco','JP2','Escola 2'],
-    ['Colegio','Vila Re','JP3','Escola 3']
-  ];
+  // Pre-preenche o mapeamento automatico Jean Piaget
   empresas.forEach(function(e, i) {
     var inp = document.getElementById('clip-map-txt-'+(i+1));
     var sel = document.getElementById('clip-map-emp-'+(i+1));
+    var nome = e.nome.toLowerCase();
     if (inp && !inp.value) {
-      // sugere baseado no nome da empresa
-      var nome = e.nome.toLowerCase();
-      if (nome.includes('ber')) inp.placeholder = 'Bercario, Ber, JP1';
-      else if (nome.includes('nei') || nome.includes('espaco')) inp.placeholder = 'NEI, Espaco, JP2';
-      else if (nome.includes('col') || nome.includes('vila')) inp.placeholder = 'Colegio, Vila Re, JP3';
+      if (nome.includes('ber'))                              inp.value = 'BI, BII, BIII';
+      else if (nome.includes('nei') || nome.includes('espa')) inp.value = 'Mini A, Mini B, Maternal';
+      else if (nome.includes('col') || nome.includes('vila')) inp.value = 'Colegio, Vila Re';
     }
     if (sel) sel.value = e.id;
   });
+  // Mostra aviso da regra automatica
+  var info = document.getElementById('clip-regra-info');
+  if (info) {
+    var e1 = empresas.find(function(e){return e.nome.toLowerCase().includes('ber');});
+    var e2 = empresas.find(function(e){return e.nome.toLowerCase().includes('nei')||e.nome.toLowerCase().includes('espa');});
+    info.innerHTML = '<div class="alert al-s" style="font-size:11px">'
+      + '<strong>Regra automatica ativa:</strong><br>'
+      + '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+(e1?e1.cor:'#888')+'"></span>'+(e1?e1.nome.split(' ').slice(0,3).join(' '):'Escola 1')+'</span>: turmas <strong>BI, BII, BIII</strong><br>'
+      + '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+(e2?e2.cor:'#888')+'"></span>'+(e2?e2.nome.split(' ').slice(0,3).join(' '):'Escola 2')+'</span>: todas as outras turmas (Mini A, Mini B, Maternal, etc.)'
+      + '</div>';
+  }
 }
 
 
